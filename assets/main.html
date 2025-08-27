@@ -74,11 +74,62 @@
 
     #container { height:100vh; width:100vw; overflow:hidden; }
     html, body { height:100%; overflow:hidden !important; }
+
+    #analog-clock {
+      position: absolute;
+      top: 18px;
+      right: 28px;
+      width: 110px;
+      height: 110px;
+      z-index: 1; /* lowest z-index */
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      pointer-events: none;
+      transition: opacity 0.2s;
+      opacity: 1;
+    }
+    #analog-clock.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .system-tray .clock-toggle-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      border: none;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 6px;
+      font-size: 15px;
+      color: #0078d7;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 0;
+    }
+    .system-tray .clock-toggle-btn:hover {
+      background: #e6f0fa;
+      color: #005fa3;
+    }
+    .system-tray .clock-toggle-btn:active {
+      background: #d0e6f7;
+      color: #003e6b;
+    }
+
+    /* ---------- Custom styles ---------- */
+    /* ...existing custom styles... */
   </style>
 </head>
 <body>
   <div id="container">
     <div class="desktop">
+      <!-- Analog clock -->
+      <canvas id="analog-clock" width="110" height="110"></canvas>
+
       <!-- Context menu -->
 <div class="context-menu" id="context-menu">
   <div class="context-menu-item" id="context-new-app"><i class="fas fa-plus"></i><span>New App</span></div>
@@ -146,10 +197,14 @@
       <div class="taskbar" id="taskbar">
         <div class="start-button" id="start-button"><i class="fab fa-windows"></i></div>
         <div class="taskbar-apps"></div>
-        <div class="system-tray">Built with <span style="color:#e25555;">&#10084;&#65039;</span>by WWO
+        <div class="system-tray">
+          Built with <span style="color:#e25555;">&#10084;&#65039;</span>by WWO
           <div class="desktop-time" id="desktop-time">--:-- --</div>
           <div class="desktop-date" id="desktop-date">--/--/----</div>
           <i class="fas fa-wifi"></i><i class="fas fa-volume-up"></i>
+          <button class="clock-toggle-btn" id="clock-toggle-btn" title="Show/hide analog clock" tabindex="0" aria-label="Toggle analog clock">
+            <i class="far fa-clock"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -790,6 +845,149 @@ function updateDateTime() {
   desktopDate.textContent = now.toLocaleDateString('en-US',{month:'numeric', day:'numeric', year:'numeric'});
 }
 
+/* ---------- Analog Clock ---------- */
+function drawAnalogClock() {
+  const canvas = document.getElementById('analog-clock');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const r = w/2;
+  ctx.clearRect(0, 0, w, h);
+
+  // Draw face
+  ctx.save();
+  ctx.translate(r, r);
+  ctx.beginPath();
+  ctx.arc(0, 0, r-4, 0, 2*Math.PI);
+  ctx.fillStyle = '#fff';
+  ctx.globalAlpha = 0.92;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#222';
+  ctx.stroke();
+
+  // Draw hour marks
+  for (let i=0; i<12; i++) {
+    ctx.save();
+    ctx.rotate(i * Math.PI/6);
+    ctx.beginPath();
+    ctx.moveTo(0, -r+16);
+    ctx.lineTo(0, -r+6);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#222';
+    ctx.stroke();
+    ctx.restore();
+  }
+  // Draw minute marks
+  for (let i=0; i<60; i++) {
+    if (i%5 === 0) continue;
+    ctx.save();
+    ctx.rotate(i * Math.PI/30);
+    ctx.beginPath();
+    ctx.moveTo(0, -r+12);
+    ctx.lineTo(0, -r+6);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#888';
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Draw hands
+  const now = new Date();
+  let hour = now.getHours();
+  let min = now.getMinutes();
+  let sec = now.getSeconds();
+
+  // Hour hand
+  ctx.save();
+  ctx.rotate(((hour%12) + min/60) * Math.PI/6);
+  ctx.beginPath();
+  ctx.moveTo(0, 8);
+  ctx.lineTo(0, -r+38);
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#222';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore();
+
+  // Minute hand
+  ctx.save();
+  ctx.rotate((min + sec/60) * Math.PI/30);
+  ctx.beginPath();
+  ctx.moveTo(0, 14);
+  ctx.lineTo(0, -r+24);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#0078d7';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore();
+
+  // Second hand
+  ctx.save();
+  ctx.rotate(sec * Math.PI/30);
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(0, -r+16);
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#e81123';
+  ctx.stroke();
+  ctx.restore();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(0,0,4,0,2*Math.PI);
+  ctx.fillStyle = '#0078d7';
+  ctx.fill();
+
+  ctx.restore();
+}
+setInterval(drawAnalogClock, 1000);
+drawAnalogClock();
+/* ---------- End Analog Clock ---------- */
+
+/* ---------- Analog Clock Toggle ---------- */
+(function analogClockToggleInit() {
+  const clock = document.getElementById('analog-clock');
+  const btn = document.getElementById('clock-toggle-btn');
+  if (!clock || !btn) return;
+
+  // Load state from localStorage
+  let visible = true;
+  try {
+    visible = localStorage.getItem('analogClockVisible') !== 'false';
+  } catch {}
+  function updateClockVisibility() {
+    if (visible) {
+      clock.classList.remove('hidden');
+      btn.style.opacity = '';
+      btn.title = 'Hide analog clock';
+      btn.setAttribute('aria-label', 'Hide analog clock');
+      btn.querySelector('i').className = 'far fa-clock';
+    } else {
+      clock.classList.add('hidden');
+      btn.style.opacity = '0.5';
+      btn.title = 'Show analog clock';
+      btn.setAttribute('aria-label', 'Show analog clock');
+      btn.querySelector('i').className = 'far fa-eye-slash';
+    }
+  }
+  btn.addEventListener('click', function(e) {
+    visible = !visible;
+    localStorage.setItem('analogClockVisible', visible ? 'true' : 'false');
+    updateClockVisibility();
+  });
+  // Keyboard accessibility
+  btn.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+  updateClockVisibility();
+})();
+/* ---------- End Analog Clock Toggle ---------- */
+
 /* ---------- Settings persistence ---------- */
 function applySettings() {
   const s = JSON.parse(localStorage.getItem('desktopSettings') || '{}');
@@ -855,16 +1053,32 @@ popup.innerHTML = `
 /* ========= App SDK / Registry ========= */
 window.AppRegistry = {
   _apps: new Map(),
+
   register(appDef) {
     if (!appDef || !appDef.id || !appDef.name || typeof appDef.open !== 'function') {
-      console.warn('Invalid appDef', appDef); return;
+      console.warn('Invalid appDef', appDef);
+      return;
     }
     if (this._apps.has(appDef.id)) return;
     this._apps.set(appDef.id, appDef);
-    createBuiltInAppIcon(appDef);
+
+    const mountIcon = () => {
+      const container = document.getElementById('desktop-icons-container');
+      if (!container) {
+        // wait until main.html is mounted by index.js
+        return setTimeout(mountIcon, 0);
+      }
+      // avoid duplicate desktop icon if already present (e.g., hot reload)
+      if (!container.querySelector(`.desktop-icon[data-app="${appDef.id}"]`)) {
+        createBuiltInAppIcon(appDef);
+      }
+    };
+    mountIcon();
   },
-  get(id){ return this._apps.get(id); }
+
+  get(id) { return this._apps.get(id); }
 };
+
 
 window.AppHost = {
   createWindow(opts) {

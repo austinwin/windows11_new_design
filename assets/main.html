@@ -1,1112 +1,938 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sewer Desktop</title>
   <link rel="stylesheet" href="assets/all.min.css">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', system-ui, sans-serif; }
-    body { overflow:hidden; background:#000; color:#fff; }
-    .desktop { width:100vw; height:100vh; position:relative; overflow:hidden; }
-    .desktop-icons { position:absolute; top:0; left:0; width:100%; height:calc(100% - 48px); padding:20px; }
-    .desktop-icon { display:flex; flex-direction:column; align-items:center; justify-content:center; width:80px; height:80px; border-radius:6px; cursor:pointer; transition:all .1s ease; user-select:none; position:absolute; }
-    .desktop-icon:hover { background-color:rgba(255,255,255,.1); }
-    
-    .desktop-icon:active { transform:scale(.95); }
-    .desktop-icon.selected { background-color:rgba(255,255,255,.2); outline:1px solid rgba(255,255,255,.5); }
-    .icon-image { font-size:32px; margin-bottom:5px; color:rgba(255,255,255,.85); text-shadow:0 1px 4px rgba(0,0,0,.35); }
-    .icon-label { font-size:14px; text-align:center; text-shadow:0 0 5px rgba(0,0,0,.5); max-width:76px; overflow:hidden; text-overflow:ellipsis; color:#000; }
-    .taskbar { position:absolute; bottom:0; left:0; width:100%; height:48px; background-color:rgba(32,32,32,.7); backdrop-filter:blur(20px); display:flex; align-items:center; padding:0 12px; gap:2px; border-top:1px solid rgba(255,255,255,.08); }
-    .start-button { width:45px; height:45px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; transition:all .2s; }
-    .start-button:hover { background-color:rgba(255,255,255,.15); }
-    .taskbar-apps { display:flex; align-items:center; gap:2px; height:100%; margin-left:10px; }
-    .taskbar-app { width:45px; height:45px; display:flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; transition:all .15s ease; }
-    .taskbar-app:hover { background-color:rgba(255,255,255,.1); }
-    .taskbar-app.active { background-color:rgba(255,255,255,.15); position:relative; }
-    .taskbar-app.active::after { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:20px; height:2px; background:#fff; border-radius:1px; }
-    .system-tray { margin-left:auto; display:flex; align-items:center; gap:5px; padding-right:10px; font-size:12px; cursor:pointer; }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+    body{overflow:hidden;background:#000;color:#fff}
+    .desktop{width:100vw;height:100vh;position:relative;overflow:hidden}
+    .desktop-icons{position:absolute;top:0;left:0;width:100%;height:calc(100% - 48px);padding:20px}
+    .desktop-icon{display:flex;flex-direction:column;align-items:center;justify-content:center;width:80px;height:80px;border-radius:6px;cursor:pointer;transition:all .1s ease;user-select:none;position:absolute}
+    .desktop-icon:hover{background:rgba(255,255,255,.1)}
+    .desktop-icon:active{transform:scale(.95)}
+    .desktop-icon.selected{background:rgba(255,255,255,.2);outline:1px solid rgba(255,255,255,.5)}
+    .icon-image{font-size:32px;margin-bottom:5px;color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.35)}
+    .icon-label{font-size:14px;text-align:center;text-shadow:0 0 5px rgba(0,0,0,.5);max-width:76px;overflow:hidden;text-overflow:ellipsis;color:#000}
 
-    .window { position:absolute; background:#fafafa; border-radius:8px; box-shadow:0 8px 32px rgba(0,0,0,.2); overflow:hidden; display:none; flex-direction:column; min-width:400px; min-height:300px; color:#000; border:1px solid rgba(255,255,255,.2); }
-    .window-header { height:32px; background:#0078d7; color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 12px; cursor:move; user-select:none; font-weight:500; }
-    .window-title { font-size:13px; font-weight:500; display:flex; align-items:center; white-space:nowrap; gap:8px; }
-    .window-controls { display:flex; gap:5px; }
-    .window-control { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:4px; cursor:pointer; transition:all .2s; color:#fff; }
-    .window-control:hover { background-color:rgba(255,255,255,.2); }
-    .window-control.close:hover { background:#e81123; }
-    .window-content { flex:1; padding:15px; overflow:auto; background:#fff; }
-    .window.resizing { user-select:none; }
-    .window-resize-handle { position:absolute; width:15px; height:15px; bottom:0; right:0; cursor:nwse-resize; }
-    .notepad-textarea { width:100%; height:100%; border:none; outline:none; resize:none; font-family:'Consolas', monospace; font-size:14px; }
+    .taskbar{position:absolute;bottom:0;left:0;width:100%;height:48px;background:rgba(32,32,32,.7);backdrop-filter:blur(20px);display:flex;align-items:center;padding:0 12px;gap:2px;border-top:1px solid rgba(255,255,255,.08)}
+    .start-button{width:45px;height:45px;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;transition:all .2s}
+    .start-button:hover{background:rgba(255,255,255,.15)}
+    .taskbar-apps{display:flex;align-items:center;gap:2px;height:100%;margin-left:10px}
+    .taskbar-app{width:45px;height:45px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;transition:all .15s}
+    .taskbar-app:hover{background:rgba(255,255,255,.1)}
+    .taskbar-app.active{background:rgba(255,255,255,.15);position:relative}
+    .taskbar-app.active::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:#fff;border-radius:1px}
+    .system-tray{margin-left:auto;display:flex;align-items:center;gap:5px;padding-right:10px;font-size:12px;cursor:pointer}
 
-    .window.maximized { width:100% !important; height:calc(100% - 48px) !important; top:0 !important; left:0 !important; border-radius:0; }
+    .window{position:absolute;background:#fafafa;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.2);overflow:hidden;display:none;flex-direction:column;min-width:400px;min-height:300px;color:#000;border:1px solid rgba(255,255,255,.2)}
+    .window-header{height:32px;background:#0078d7;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 12px;cursor:move;user-select:none;font-weight:500}
+    .window-title{font-size:13px;font-weight:500;display:flex;align-items:center;white-space:nowrap;gap:8px}
+    .window-controls{display:flex;gap:5px}
+    .window-control{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;transition:all .2s;color:#fff}
+    .window-control:hover{background:rgba(255,255,255,.2)}
+    .window-control.close:hover{background:#e81123}
+    .window-content{flex:1;padding:15px;overflow:auto;background:#fff}
+    .window.resizing{user-select:none}
+    .window-resize-handle{position:absolute;width:15px;height:15px;bottom:0;right:0;cursor:nwse-resize}
+    .notepad-textarea{width:100%;height:100%;border:none;outline:none;resize:none;font-family:'Consolas',monospace;font-size:14px}
+    .window.maximized{width:100%!important;height:calc(100% - 48px)!important;top:0!important;left:0!important;border-radius:0}
 
-    .desktop-background { position:absolute; top:0; left:0; width:100%; height:calc(100% - 48px); background:url('./assets/wall_papers/windows_xp_bliss-wide.jpg') center/cover no-repeat; }
-    .desktop-time { font-size:12px; margin-right:5px; }
-    .desktop-date { font-size:12px; }
-    .window-icon { width:16px; height:16px; margin-right:8px; font-size:16px; }
+    .desktop-background{position:absolute;top:0;left:0;width:100%;height:calc(100% - 48px);background:url('./assets/wall_papers/windows_xp_bliss-wide.jpg') center/cover no-repeat}
+    .desktop-time{font-size:12px;margin-right:5px}
+    .desktop-date{font-size:12px}
+    .window-icon{width:16px;height:16px;margin-right:8px;font-size:16px}
 
-    .context-menu { position:absolute; background:rgba(45,45,45,.98); backdrop-filter:blur(10px); border-radius:8px; padding:4px; box-shadow:0 4px 20px rgba(0,0,0,.3); min-width:200px; display:none; z-index:1000; border:1px solid rgba(255,255,255,.1); }
-    .context-menu-item { padding:8px 12px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:13px; transition:all .2s; }
-    .context-menu-item:hover { background:rgba(255,255,255,.1); }
-    .context-menu-item i { width:16px; text-align:center; }
+    .context-menu{position:absolute;background:rgba(45,45,45,.98);backdrop-filter:blur(10px);border-radius:8px;padding:4px;box-shadow:0 4px 20px rgba(0,0,0,.3);min-width:200px;display:none;z-index:1000;border:1px solid rgba(255,255,255,.1)}
+    .context-menu-item{padding:8px 12px;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;transition:all .2s}
+    .context-menu-item:hover{background:rgba(255,255,255,.1)}
+    .context-menu-item i{width:16px;text-align:center}
 
-    .modal { position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:2000; display:none; }
-    .modal-content { background:#fafafa; border-radius:8px; padding:20px; width:400px; box-shadow:0 8px 32px rgba(0,0,0,.2); color:#000; }
-    .modal-header { font-weight:600; margin-bottom:15px; font-size:16px; }
-    .modal-body { margin-bottom:20px; }
-    .form-group { margin-bottom:15px; }
-    .form-group label { display:block; margin-bottom:5px; font-size:14px; }
-    .form-group input { width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:14px; }
-    .modal-footer { display:flex; justify-content:flex-end; gap:10px; }
-    .modal-btn { padding:8px 16px; border-radius:4px; border:none; cursor:pointer; font-size:14px; }
-    .modal-btn.primary { background:#0078d7; color:#fff; }
-    .modal-btn.secondary { background:#e0e0e0; }
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;display:none}
+    .modal-content{background:#fafafa;border-radius:8px;padding:20px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,.2);color:#000}
+    .modal-header{font-weight:600;margin-bottom:15px;font-size:16px}
+    .modal-body{margin-bottom:20px}
+    .form-group{margin-bottom:15px}
+    .form-group label{display:block;margin-bottom:5px;font-size:14px}
+    .form-group input{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:14px}
+    .modal-footer{display:flex;justify-content:flex-end;gap:10px}
+    .modal-btn{padding:8px 16px;border-radius:4px;border:none;cursor:pointer;font-size:14px}
+    .modal-btn.primary{background:#0078d7;color:#fff}
+    .modal-btn.secondary{background:#e0e0e0}
 
-    body.taskbar-hidden .desktop-background { height:100%; }
-    body.taskbar-hidden .desktop-icons { height:100%; }
-    body.taskbar-hidden .window.maximized { height:100% !important; }
+    body.taskbar-hidden .desktop-background{height:100%}
+    body.taskbar-hidden .desktop-icons{height:100%}
+    body.taskbar-hidden .window.maximized{height:100%!important}
 
-    @media (max-width:768px) { .window { min-width:300px; min-height:250px; } }
-    @media (max-width:480px) { .window { min-width:280px; min-height:200px; } }
+    @media (max-width:768px){.window{min-width:300px;min-height:250px}}
+    @media (max-width:480px){.window{min-width:280px;min-height:200px}}
 
-    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    #container{height:100vh;width:100vw;overflow:hidden}
+    html,body{height:100%;overflow:hidden!important}
 
-    #container { height:100vh; width:100vw; overflow:hidden; }
-    html, body { height:100%; overflow:hidden !important; }
+    /* ==== Analog clock ==== */
+    #analog-clock{position:absolute;top:18px;right:28px;width:110px;height:110px;z-index:1;background:rgba(255,255,255,0.08);border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.12);pointer-events:none;transition:opacity .2s;opacity:1}
+    #analog-clock.hidden{opacity:0;pointer-events:none}
+    .system-tray .clock-toggle-btn{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.12);border:none;outline:none;display:flex;align-items:center;justify-content:center;margin-left:6px;font-size:15px;color:#0078d7;cursor:pointer;transition:background .18s,color .18s;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:0}
+    .system-tray .clock-toggle-btn:hover{background:#e6f0fa;color:#005fa3}
+    .system-tray .clock-toggle-btn:active{background:#d0e6f7;color:#003e6b}
 
-    #analog-clock {
-      position: absolute;
-      top: 18px;
-      right: 28px;
-      width: 110px;
-      height: 110px;
-      z-index: 1; /* lowest z-index */
-      background: rgba(255,255,255,0.08);
-      border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-      pointer-events: none;
-      transition: opacity 0.2s;
-      opacity: 1;
-    }
-    #analog-clock.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .system-tray .clock-toggle-btn {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.12);
-      border: none;
-      outline: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 6px;
-      font-size: 15px;
-      color: #0078d7;
-      cursor: pointer;
-      transition: background 0.18s, color 0.18s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      padding: 0;
-    }
-    .system-tray .clock-toggle-btn:hover {
-      background: #e6f0fa;
-      color: #005fa3;
-    }
-    .system-tray .clock-toggle-btn:active {
-      background: #d0e6f7;
-      color: #003e6b;
-    }
-
-    /* ---------- Custom styles ---------- */
-    /* ...existing custom styles... */
+    /* ==== START MENU (Windows 11 style) ==== */
+.start-overlay {
+  position: fixed;
+  bottom: 1px;     /* just above taskbar */
+  left: 5px;        /* align with taskbar padding */
+  transform: none;  /* remove centering */
+  width: 480px;
+  background: var(--panel);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  padding: 12px;
+  display: none;
+}    .start-menu{position:absolute;left:50%;bottom:54px;transform:translateX(-50%);width:min(860px,90vw);max-height:min(75vh,720px);background:rgba(32,32,32,.85);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
+.start-menu{
+  left:0;              /* placeholder; overridden by JS */
+  bottom:48px;         /* placeholder; overridden by JS */
+  transform:none;      /* no CSS centering */
+}
+    .start-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+    .start-search{flex:1;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 12px}
+    .start-search input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:14px}
+    .start-body{padding:16px;overflow:auto}
+    .start-section-title{font-size:12px;letter-spacing:.08em;color:#c7d1e0;margin:6px 2px 10px 2px;text-transform:uppercase;opacity:.85}
+    .start-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+    .start-tile{height:76px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid transparent;border-radius:10px;padding:10px;cursor:pointer;transition:transform .06s ease,background .12s ease,border-color .12s ease}
+    .start-tile:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
+    .start-tile:active{transform:scale(.98)}
+    .start-tile .tile-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.14);overflow:hidden}
+    .start-tile .tile-icon img{width:100%;height:100%;object-fit:contain}
+    .start-tile .tile-name{font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+    .start-empty{padding:24px;color:#cbd5e1}
   </style>
 </head>
 <body>
-  <div id="container">
-    <div class="desktop">
-      <!-- Analog clock -->
-      <canvas id="analog-clock" width="110" height="110"></canvas>
+<div id="container">
+  <div class="desktop">
+    <!-- Analog clock -->
+    <canvas id="analog-clock" width="110" height="110"></canvas>
 
-      <!-- Context menu -->
-<div class="context-menu" id="context-menu">
-  <div class="context-menu-item" id="context-new-app"><i class="fas fa-plus"></i><span>New App</span></div>
-  <div class="context-menu-item" id="context-delete-app"><i class="fas fa-trash"></i><span>Delete App</span></div>
-  <div class="context-menu-item" id="context-edit-app"><i class="fas fa-info-circle"></i><span>Properties</span></div>
-  <div style="border-top:1px solid rgba(255,255,255,0.15);margin:4px 0;"></div>
-  <div class="context-menu-item" id="context-setting"><i class="fas fa-cog"></i><span>Setting</span></div>
-  <div class="context-menu-item" id="context-toggle-taskbar"><i class="fas fa-bars"></i><span>Toggle Taskbar</span></div>
-  <div class="context-menu-item" id="context-full-view"><i class="fas fa-expand"></i><span>Full View</span></div>
-</div>
+    <!-- Context menu -->
+    <div class="context-menu" id="context-menu">
+      <div class="context-menu-item" id="context-new-app"><i class="fas fa-plus"></i><span>New App</span></div>
+      <div class="context-menu-item" id="context-delete-app"><i class="fas fa-trash"></i><span>Delete App</span></div>
+      <div class="context-menu-item" id="context-edit-app"><i class="fas fa-info-circle"></i><span>Properties</span></div>
+      <div style="border-top:1px solid rgba(255,255,255,.15);margin:4px 0"></div>
+      <div class="context-menu-item" id="context-setting"><i class="fas fa-cog"></i><span>Setting</span></div>
+      <div class="context-menu-item" id="context-toggle-taskbar"><i class="fas fa-bars"></i><span>Toggle Taskbar</span></div>
+      <div class="context-menu-item" id="context-full-view"><i class="fas fa-expand"></i><span>Full View</span></div>
+    </div>
 
-
-      <!-- New App Modal -->
-      <div class="modal" id="new-app-modal">
-        <div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,.25); border-radius:12px; padding:0; overflow:hidden; min-width:380px;">
-          <div class="modal-header" style="background:linear-gradient(90deg,#0078d7 60%,#005fa3 100%); color:#fff; display:flex; align-items:center; gap:10px; padding:18px 24px 14px 24px; font-size:18px; font-weight:500;">
-            <i class="fas fa-plus-square" style="font-size:22px; opacity:.85;"></i> Create New App
+    <!-- New App Modal -->
+    <div class="modal" id="new-app-modal">
+      <div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,.25);border-radius:12px;padding:0;overflow:hidden;min-width:380px">
+        <div class="modal-header" style="background:linear-gradient(90deg,#0078d7 60%,#005fa3 100%);color:#fff;display:flex;align-items:center;gap:10px;padding:18px 24px 14px 24px;font-size:18px;font-weight:500">
+          <i class="fas fa-plus-square" style="font-size:22px;opacity:.85"></i> Create New App
+        </div>
+        <div class="modal-body" style="padding:24px 24px 8px 24px">
+          <div class="form-group" style="margin-bottom:18px">
+            <label for="app-name" style="font-size:15px;color:#222;margin-bottom:6px;font-weight:500">App Name</label>
+            <input id="app-name" placeholder="Enter app name"
+                   style="width:100%;padding:10px 12px;border:1.5px solid #c7c7c7;border-radius:6px;font-size:15px;background:#f7fafd;transition:border .2s;outline:none"
+                   onfocus="this.style.borderColor='#0078d7';" onblur="this.style.borderColor='#c7c7c7';">
           </div>
-          <div class="modal-body" style="padding:24px 24px 8px 24px;">
-            <div class="form-group" style="margin-bottom:18px;">
-              <label for="app-name" style="font-size:15px; color:#222; margin-bottom:6px; font-weight:500;">App Name</label>
-              <input type="text" id="app-name" placeholder="Enter app name"
-                     style="width:100%; padding:10px 12px; border:1.5px solid #c7c7c7; border-radius:6px; font-size:15px; background:#f7fafd; transition:border .2s; outline:none;"
-                     onfocus="this.style.borderColor='#0078d7';" onblur="this.style.borderColor='#c7c7c7';">
-            </div>
-            <div class="form-group" style="margin-bottom:8px;">
-              <label for="app-url" style="font-size:15px; color:#222; margin-bottom:6px; font-weight:500;">App URL</label>
-              <input type="text" id="app-url" placeholder="https://example.com"
-                     style="width:100%; padding:10px 12px; border:1.5px solid #c7c7c7; border-radius:6px; font-size:15px; background:#f7fafd; transition:border .2s; outline:none;"
-                     onfocus="this.style.borderColor='#0078d7';" onblur="this.style.borderColor='#c7c7c7';">
-            </div>
-            <div class="form-group" style="margin-bottom:8px;">
-              <label id="app-open-newtab-label" for="app-open-newtab" style="font-size:15px; color:#222; font-weight:500; display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="app-open-newtab" checked style="accent-color:#0078d7; width:18px; height:18px; margin-right:8px;">
-                Open in new tab
-              </label>
-              <span style="font-size:12px;color:#666;margin-left:26px;">If checked, app opens in a new browser tab.</span>
-            </div>
-            <div class="form-group" style="margin-bottom:8px;">
-              <label style="font-size:15px; color:#222; font-weight:500; display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="app-use-favicon" checked style="accent-color:#0078d7; width:18px; height:18px; margin-right:8px;">
-                Use website favicon instead of Auto icon
-              </label>
-            </div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label for="app-url" style="font-size:15px;color:#222;margin-bottom:6px;font-weight:500">App URL</label>
+            <input id="app-url" placeholder="https://example.com"
+                   style="width:100%;padding:10px 12px;border:1.5px solid #c7c7c7;border-radius:6px;font-size:15px;background:#f7fafd;transition:border .2s;outline:none"
+                   onfocus="this.style.borderColor='#0078d7';" onblur="this.style.borderColor='#c7c7c7';">
           </div>
-          <div class="modal-footer" style="padding:16px 24px 20px 24px; background:#f3f6fa; display:flex; justify-content:flex-end; gap:12px;">
-            <button class="modal-btn secondary" id="modal-cancel">Cancel</button>
-            <button class="modal-btn primary" id="modal-ok">OK</button>
+          <div class="form-group" style="margin-bottom:8px">
+            <label id="app-open-newtab-label" for="app-open-newtab" style="font-size:15px;color:#222;font-weight:500;display:flex;align-items:center;gap:10px">
+              <input type="checkbox" id="app-open-newtab" checked style="accent-color:#0078d7;width:18px;height:18px;margin-right:8px">Open in new tab
+            </label>
+            <span style="font-size:12px;color:#666;margin-left:26px">If checked, app opens in a new browser tab.</span>
+          </div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label style="font-size:15px;color:#222;font-weight:500;display:flex;align-items:center;gap:10px">
+              <input type="checkbox" id="app-use-favicon" checked style="accent-color:#0078d7;width:18px;height:18px;margin-right:8px">Use website favicon instead of Auto icon
+            </label>
           </div>
         </div>
-      </div>
-
-      <div class="desktop-background"></div>
-
-      <!-- Only keep custom/hardcoded external entry if you want it present on first load -->
-      <div class="desktop-icons" id="desktop-icons-container">
-        <div class="desktop-icon" data-app="CTV RFI" data-app-type="custom"
-             data-url="https://houtx.sharepoint.com/sites/sewer/Shared%20Documents/wwo%20asset%20map/index.aspx"
-             data-open-newtab="true">
-          <div class="icon-image"><i class="fas fa-share-square"></i></div>
-          <div class="icon-label">WWO Map</div>
-        </div>
-      </div>
-
-      <div class="taskbar" id="taskbar">
-        <div class="start-button" id="start-button"><i class="fab fa-windows"></i></div>
-        <div class="taskbar-apps"></div>
-        <div class="system-tray">
-          Built with <span style="color:#e25555;">&#10084;&#65039;</span>by WWO
-          <div class="desktop-time" id="desktop-time">--:-- --</div>
-          <div class="desktop-date" id="desktop-date">--/--/----</div>
-          <i class="fas fa-wifi"></i><i class="fas fa-volume-up"></i>
-          <button class="clock-toggle-btn" id="clock-toggle-btn" title="Show/hide analog clock" tabindex="0" aria-label="Toggle analog clock">
-            <i class="far fa-clock"></i>
-          </button>
+        <div class="modal-footer" style="padding:16px 24px 20px 24px;background:#f3f6fa;display:flex;justify-content:flex-end;gap:12px">
+          <button class="modal-btn secondary" id="modal-cancel">Cancel</button>
+          <button class="modal-btn primary" id="modal-ok">OK</button>
         </div>
       </div>
     </div>
+
+    <div class="desktop-background"></div>
+
+    <!-- Desktop icons container -->
+    <div class="desktop-icons" id="desktop-icons-container">
+      <div class="desktop-icon" data-app="CTV RFI" data-app-type="custom"
+           data-url="https://houtx.sharepoint.com/sites/sewer/Shared%20Documents/wwo%20asset%20map/index.aspx"
+           data-open-newtab="true">
+        <div class="icon-image"><i class="fas fa-share-square"></i></div>
+        <div class="icon-label">WWO Map</div>
+      </div>
+    </div>
+
+    <!-- START OVERLAY + MENU -->
+    <div class="start-overlay" id="start-overlay" aria-hidden="true">
+      <div class="start-menu" role="dialog" aria-modal="true" aria-label="Start menu">
+        <div class="start-header">
+          <div class="start-search">
+            <i class="fas fa-search"></i>
+            <input id="start-search-input" type="text" placeholder="Search for apps, settings, and documents"/>
+          </div>
+        </div>
+        <div class="start-body">
+          <div class="start-section-title">All apps</div>
+          <div class="start-grid" id="start-grid"></div>
+          <div class="start-empty" id="start-empty" style="display:none">No apps match your search.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar" id="taskbar">
+      <div class="start-button" id="start-button"><i class="fab fa-windows"></i></div>
+      <div class="taskbar-apps"></div>
+      <div class="system-tray">
+  <span id="tray-about-text" style="cursor:pointer;">
+    Built with <span style="color:#e25555;">&#10084;&#65039;</span>by WWO
+  </span>
+          <div class="desktop-time" id="desktop-time">--:-- --</div>
+        <div class="desktop-date" id="desktop-date">--/--/----</div>
+        <i class="fas fa-wifi"></i><i class="fas fa-volume-up"></i>
+        <button class="clock-toggle-btn" id="clock-toggle-btn" title="Show/hide analog clock" tabindex="0" aria-label="Toggle analog clock">
+          <i class="far fa-clock"></i>
+        </button>
+      </div>
+    </div>
   </div>
+</div>
 
-  <script>
+<script>
 /* ---------- Globals & state ---------- */
-if (!window.__SEWER_DESKTOP_INIT) window.__SEWER_DESKTOP_INIT = false;
+if(!window.__SEWER_DESKTOP_INIT) window.__SEWER_DESKTOP_INIT=false;
 
-const taskbar = document.getElementById('taskbar');
-const taskbarApps = document.querySelector('.taskbar-apps');
-const startButton = document.querySelector('.start-button');
-const desktopTime = document.getElementById('desktop-time');
-const desktopDate = document.getElementById('desktop-date');
+const taskbar=document.getElementById('taskbar');
+const taskbarApps=document.querySelector('.taskbar-apps');
+const startButton=document.getElementById('start-button');
+const desktopTime=document.getElementById('desktop-time');
+const desktopDate=document.getElementById('desktop-date');
 
-let activeWindow = null;
-let zIndex = 10;
-let isDragging = false, isResizing = false, isIconDragging = false;
-let offsetX, offsetY;
-let draggedIcon = null, iconOffsetX = 0, iconOffsetY = 0;
-let selectedIconForDeletion = null;
-let initialWidth, initialHeight, initialMouseX, initialMouseY;
+let activeWindow=null;
+let zIndex=10;
+let isDragging=false,isResizing=false,isIconDragging=false;
+let offsetX,offsetY;
+let draggedIcon=null,iconOffsetX=0,iconOffsetY=0;
+let selectedIconForDeletion=null;
+let initialWidth,initialHeight,initialMouseX,initialMouseY;
 
 /* ---------- Wallpapers ---------- */
-window.WALLPAPER_LIST = [
-  "./assets/wall_papers/maxresdefault.jpg",
-  "./assets/wall_papers/sunrise-phu-quoc-island-ocean.jpg",
-  "./assets/wall_papers/aesthetics-vector.jpg",
-  "./assets/wall_papers/feature-16.jpg",
-  "./assets/wall_papers/L3TwOt.jpg",
-  "./assets/wall_papers/img19.jpg",
-  "./assets/wall_papers/vzCZX6.jpg",
-  "./assets/wall_papers/windows_xp_bliss-wide.jpg",
-  "./assets/wall_papers/bliss-windows-xp-remastered-2025-5k-vt.jpg",
-  "./assets/wall_papers/Bloom-wallpaper-Dark.jpg",
-  "./assets/wall_papers/GkvHgr.jpg",
-  "./assets/wall_papers/wp11467830.jpg",
-  "./assets/wall_papers/il_fullxfull.6568596024_nlhh.jpg",
-  "./assets/wall_papers/thumb-1920-251305.jpg",
-  "./assets/wall_papers/hd-country-life-at-night-vvxmbqzkr4uumuni.jpg"
+window.WALLPAPER_LIST=[
+  "./assets/wall_papers/maxresdefault.jpg","./assets/wall_papers/sunrise-phu-quoc-island-ocean.jpg","./assets/wall_papers/aesthetics-vector.jpg","./assets/wall_papers/feature-16.jpg","./assets/wall_papers/L3TwOt.jpg","./assets/wall_papers/img19.jpg","./assets/wall_papers/vzCZX6.jpg","./assets/wall_papers/windows_xp_bliss-wide.jpg","./assets/wall_papers/bliss-windows-xp-remastered-2025-5k-vt.jpg","./assets/wall_papers/Bloom-wallpaper-Dark.jpg","./assets/wall_papers/GkvHgr.jpg","./assets/wall_papers/wp11467830.jpg","./assets/wall_papers/il_fullxfull.6568596024_nlhh.jpg","./assets/wall_papers/thumb-1920-251305.jpg","./assets/wall_papers/hd-country-life-at-night-vvxmbqzkr4uumuni.jpg"
 ];
-
-window.WALLPAPER_THUMB_LIST = [
-  "./assets/wall_papers/maxresdefault_thumb.jpg",
-  "./assets/wall_papers/sunrise-phu-quoc-island-ocean_thumb.jpg",
-  "./assets/wall_papers/aesthetics-vector_thumb.jpg",
-  "./assets/wall_papers/feature-16_thumb.jpg",
-  "./assets/wall_papers/L3TwOt_thumb.jpg",
-  "./assets/wall_papers/img19_thumb.jpg",
-  "./assets/wall_papers/vzCZX6_thumb.jpg",
-  "./assets/wall_papers/windows_xp_bliss-wide_thumb.jpg",
-  "./assets/wall_papers/bliss-windows-xp-remastered-2025-5k-vt_thumb.jpg",
-  "./assets/wall_papers/Bloom-wallpaper-Dark_thumb.jpg",
-  "./assets/wall_papers/GkvHgr_thumb.jpg",
-  "./assets/wall_papers/wp11467830_thumb.jpg",
-  "./assets/wall_papers/il_fullxfull.6568596024_nlhh_thumb.jpg",
-  "./assets/wall_papers/thumb-1920-251305_thumb.jpg",
-  "./assets/wall_papers/hd-country-life-at-night-vvxmbqzkr4uumuni_thumb.jpg"
+window.WALLPAPER_THUMB_LIST=[
+  "./assets/wall_papers/maxresdefault_thumb.jpg","./assets/wall_papers/sunrise-phu-quoc-island-ocean_thumb.jpg","./assets/wall_papers/aesthetics-vector_thumb.jpg","./assets/wall_papers/feature-16_thumb.jpg","./assets/wall_papers/L3TwOt_thumb.jpg","./assets/wall_papers/img19_thumb.jpg","./assets/wall_papers/vzCZX6_thumb.jpg","./assets/wall_papers/windows_xp_bliss-wide_thumb.jpg","./assets/wall_papers/bliss-windows-xp-remastered-2025-5k-vt_thumb.jpg","./assets/wall_papers/Bloom-wallpaper-Dark_thumb.jpg","./assets/wall_papers/GkvHgr_thumb.jpg","./assets/wall_papers/wp11467830_thumb.jpg","./assets/wall_papers/il_fullxfull.6568596024_nlhh_thumb.jpg","./assets/wall_papers/thumb-1920-251305_thumb.jpg","./assets/wall_papers/hd-country-life-at-night-vvxmbqzkr4uumuni_thumb.jpg"
 ];
 
 /* ---------- Desktop init ---------- */
-function initDesktop() {
-  if (window.__SEWER_DESKTOP_INIT) return;
-  window.__SEWER_DESKTOP_INIT = true;
+function initDesktop(){
+  if(window.__SEWER_DESKTOP_INIT) return;
+  window.__SEWER_DESKTOP_INIT=true;
 
   updateDateTime();
-  setInterval(updateDateTime, 1000);
+  setInterval(updateDateTime,1000);
   applySettings();
   loadIconPositions();
   loadCustomApps();
 
-  // Only wire generic handlers for CUSTOM icons present at boot
-  document.querySelectorAll('.desktop-icon').forEach(icon => {
-    if (icon.getAttribute('data-app-type') === 'custom') {
-      wireCustomIcon(icon);
-    }
+  // Wire custom icons present at boot
+  document.querySelectorAll('.desktop-icon').forEach(icon=>{
+    if(icon.getAttribute('data-app-type')==='custom'){ wireCustomIcon(icon); }
   });
 
-  // Deselect icons when clicking empty space
-  document.querySelector('.desktop').addEventListener('click', e => {
-    if (e.target === document.querySelector('.desktop') || e.target === document.querySelector('.desktop-background')) {
-      document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+  // Deselect icons on empty click
+  document.querySelector('.desktop').addEventListener('click',e=>{
+    if(e.target===document.querySelector('.desktop')||e.target===document.querySelector('.desktop-background')){
+      document.querySelectorAll('.desktop-icon').forEach(i=>i.classList.remove('selected'));
     }
   });
 
   // Context menu
-  document.querySelector('.desktop').addEventListener('contextmenu', e => {
-    e.preventDefault();
-    showContextMenu(e.clientX, e.clientY);
+  document.querySelector('.desktop').addEventListener('contextmenu',e=>{
+    e.preventDefault(); showContextMenu(e.clientX,e.clientY);
   });
-  document.addEventListener('click', hideContextMenu);
-  document.addEventListener('mouseup', stopIconDrag);
-  document.addEventListener('mousemove', dragIcon);
+  document.addEventListener('click',hideContextMenu);
+  document.addEventListener('mouseup',stopIconDrag);
+  document.addEventListener('mousemove',dragIcon);
   initContextMenu();
 
-  // Start button -> open Settings app
-  startButton.addEventListener('click', () => {
-    const def = AppRegistry.get('settings');
-    if (def) def.open(AppHost);
-  });
+  // START button -> toggle Start menu
+  startButton.addEventListener('click',()=>toggleStartMenu());
 
   // System tray popup
   bootstrapSystemTray();
+
+  // Build Start menu initially
+  buildStartMenu();
 }
 
-function wireCustomIcon(icon) {
-  icon.addEventListener('dblclick', () => {
-    const openNewTab = icon.getAttribute('data-open-newtab') === 'true';
-    if (openNewTab) window.open(icon.getAttribute('data-url'), '_blank');
-    else openCustomApp(icon.getAttribute('data-app'), icon.getAttribute('data-url'), icon.getAttribute('data-app-id'));
+/* ===================== START MENU LOGIC ===================== */
+function getAllApps(){
+  // Built-ins from registry
+  const builtins=[...AppRegistry._apps.values()].map(a=>({
+    id:a.id,type:'builtin',name:a.name,
+    icon:getIconForStartFromDef(a)
+  }));
+  // Customs from desktop icons
+  const customs=[...document.querySelectorAll('.desktop-icon[data-app-type="custom"]')].map(el=>{
+    const name=el.getAttribute('data-app');
+    const id=el.getAttribute('data-app-id')||name;
+    const url=el.getAttribute('data-url');
+    const openNewTab=el.getAttribute('data-open-newtab')==='true';
+    const useFav=el.getAttribute('data-use-favicon')==='true';
+    let iconHtml='';
+    const img=el.querySelector('.icon-image img');
+    const i=el.querySelector('.icon-image i');
+    if(img) iconHtml={type:'img',value:img.src};
+    else if(i) iconHtml={type:'fa',value:i.className};
+    else iconHtml={type:'fa',value:'fas fa-globe'};
+    return {id,type:'custom',name,icon:iconHtml,url,openNewTab, useFav};
   });
-  icon.addEventListener('click', e => {
-    if (isIconDragging) return;
-    document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+  return [...builtins, ...customs];
+}
+function getIconForStartFromDef(appDef){
+  if(!appDef.icon) return {type:'fa',value:'fas fa-sticky-note'};
+  if(appDef.icon.type==='svg') return {type:'svg',value:appDef.icon.value};
+  if(appDef.icon.type==='fa') return {type:'fa',value:appDef.icon.value};
+  return {type:'img',value:appDef.icon.value};
+}
+function buildStartMenu(){
+  const grid=document.getElementById('start-grid');
+  if(!grid) return;
+  grid.innerHTML='';
+  const apps=getAllApps();
+
+  apps.forEach(app=>{
+    const tile=document.createElement('div');
+    tile.className='start-tile';
+    tile.setAttribute('data-app-id',app.id);
+    tile.setAttribute('data-app-type',app.type);
+
+    let iconInner='<i class="fas fa-window-maximize"></i>';
+    if(app.icon){
+      if(app.icon.type==='img') iconInner=`<img src="${app.icon.value}">`;
+      else if(app.icon.type==='fa') iconInner=`<i class="${app.icon.value}"></i>`;
+      else if(app.icon.type==='svg') iconInner=app.icon.value;
+    }
+    tile.innerHTML=`<div class="tile-icon">${iconInner}</div><div class="tile-name" title="${app.name}">${app.name}</div>`;
+
+    tile.addEventListener('click',()=>{
+      launchFromStart(app);
+    });
+    grid.appendChild(tile);
+  });
+
+  // Wire search
+  const input=document.getElementById('start-search-input');
+  const empty=document.getElementById('start-empty');
+  input.value='';
+  input.oninput=()=>{
+    const q=input.value.trim().toLowerCase();
+    let visibleCount=0;
+    grid.querySelectorAll('.start-tile').forEach(t=>{
+      const name=t.querySelector('.tile-name').textContent.toLowerCase();
+      const match=!q || name.includes(q);
+      t.style.display=match?'flex':'none';
+      if(match) visibleCount++;
+    });
+    empty.style.display=visibleCount? 'none':'block';
+  };
+
+  // Enter launches first visible
+  input.onkeydown=(e)=>{
+    if(e.key==='Enter'){
+      const first=[...grid.querySelectorAll('.start-tile')].find(t=>t.style.display!== 'none');
+      if(first){
+        first.click();
+      }
+    }
+  };
+}
+function openStartMenu(){
+  const ov = document.getElementById('start-overlay');
+  ov.style.display='block';
+  ov.setAttribute('aria-hidden','false');
+  buildStartMenu();
+  positionStartMenu();  // <<< anchor over Start button
+  setTimeout(()=>document.getElementById('start-search-input').focus(),0);
+
+  const outsideClose=(e)=>{
+    const menu=document.querySelector('.start-menu');
+    if(!menu.contains(e.target) && e.target!==startButton){
+      closeStartMenu(); document.removeEventListener('mousedown',outsideClose,true);
+      window.removeEventListener('resize', positionStartMenu);
+    }
+  };
+  document.addEventListener('mousedown',outsideClose,true);
+
+  const escHandler=(e)=>{
+    if(e.key==='Escape'){ closeStartMenu(); document.removeEventListener('keydown',escHandler); window.removeEventListener('resize', positionStartMenu); }
+  };
+  document.addEventListener('keydown',escHandler);
+
+  // Reposition if window size changes
+  window.addEventListener('resize', positionStartMenu);
+}
+
+function closeStartMenu(){
+  const ov=document.getElementById('start-overlay');
+  ov.style.display='none';
+  ov.setAttribute('aria-hidden','true');
+}
+function toggleStartMenu(){
+  const ov=document.getElementById('start-overlay');
+  if(ov.style.display==='block') closeStartMenu(); else openStartMenu();
+}
+function launchFromStart(app){
+  closeStartMenu();
+  if(app.type==='builtin'){
+    const def=AppRegistry.get(app.id);
+    if(def) def.open(AppHost);
+    return;
+  }
+  // custom
+  const iconEl=[...document.querySelectorAll('.desktop-icon[data-app-type="custom"]')].find(i=>{
+    const id=i.getAttribute('data-app-id')||i.getAttribute('data-app');
+    return id===app.id;
+  });
+  const openNewTab = iconEl ? (iconEl.getAttribute('data-open-newtab')==='true') : (app.openNewTab===true);
+  if(openNewTab) window.open(app.url,'_blank');
+  else openCustomApp(app.name,app.url,app.id);
+}
+/* =================== END START MENU LOGIC =================== */
+
+/* ---------- Custom icons ---------- */
+function wireCustomIcon(icon){
+  icon.addEventListener('dblclick',()=>{
+    const openNewTab=icon.getAttribute('data-open-newtab')==='true';
+    if(openNewTab) window.open(icon.getAttribute('data-url'),'_blank');
+    else openCustomApp(icon.getAttribute('data-app'),icon.getAttribute('data-url'),icon.getAttribute('data-app-id'));
+  });
+  icon.addEventListener('click',e=>{
+    if(isIconDragging) return;
+    document.querySelectorAll('.desktop-icon').forEach(i=>i.classList.remove('selected'));
     icon.classList.add('selected');
-    selectedIconForDeletion = icon;
+    selectedIconForDeletion=icon;
   });
-  icon.addEventListener('mousedown', startIconDrag);
+  icon.addEventListener('mousedown',startIconDrag);
 }
 
 /* ---------- Icon persistence ---------- */
-function loadIconPositions() {
-  const savedPositions = JSON.parse(localStorage.getItem('desktopIconPositions') || '{}');
-  document.querySelectorAll('.desktop-icon').forEach((icon, index) => {
-    const appId = icon.getAttribute('data-app-id') || icon.getAttribute('data-app');
-    if (savedPositions[appId]) {
-      icon.style.left = savedPositions[appId].left;
-      icon.style.top  = savedPositions[appId].top;
-    } else {
-      const gridSize = 100;
-      const row = Math.floor(index / 4), col = index % 4;
-      icon.style.left = `${20 + col * gridSize}px`;
-      icon.style.top  = `${20 + row * gridSize}px`;
-    }
+function loadIconPositions(){
+  const saved=JSON.parse(localStorage.getItem('desktopIconPositions')||'{}');
+  document.querySelectorAll('.desktop-icon').forEach((icon,index)=>{
+    const appId=icon.getAttribute('data-app-id')||icon.getAttribute('data-app');
+    if(saved[appId]){ icon.style.left=saved[appId].left; icon.style.top=saved[appId].top; }
+    else{ const g=100,row=Math.floor(index/4),col=index%4; icon.style.left=`${20+col*g}px`; icon.style.top=`${20+row*g}px`; }
   });
 }
-function saveIconPositions() {
-  const positions = {};
-  document.querySelectorAll('.desktop-icon').forEach(icon => {
-    const appId = icon.getAttribute('data-app-id') || icon.getAttribute('data-app');
-    positions[appId] = { left: icon.style.left, top: icon.style.top };
+function saveIconPositions(){
+  const positions={};
+  document.querySelectorAll('.desktop-icon').forEach(icon=>{
+    const appId=icon.getAttribute('data-app-id')||icon.getAttribute('data-app');
+    positions[appId]={left:icon.style.left,top:icon.style.top};
   });
-  localStorage.setItem('desktopIconPositions', JSON.stringify(positions));
+  localStorage.setItem('desktopIconPositions',JSON.stringify(positions));
 }
 
 /* ---------- Custom apps persistence ---------- */
-function saveCustomApps() {
-  const customApps = [];
-  document.querySelectorAll('.desktop-icon[data-app-type="custom"]').forEach(icon => {
+function saveCustomApps(){
+  const customApps=[];
+  document.querySelectorAll('.desktop-icon[data-app-type="custom"]').forEach(icon=>{
     customApps.push({
-      id: icon.getAttribute('data-app-id'),
-      name: icon.getAttribute('data-app'),
-      url: icon.getAttribute('data-url'),
-      iconClass: icon.getAttribute('data-icon-class'),
-      openNewTab: icon.getAttribute('data-open-newtab') === 'true',
-      useFavicon: icon.getAttribute('data-use-favicon') === 'true',
-      faviconUrl: icon.getAttribute('data-favicon-url') || null
+      id:icon.getAttribute('data-app-id'),
+      name:icon.getAttribute('data-app'),
+      url:icon.getAttribute('data-url'),
+      iconClass:icon.getAttribute('data-icon-class'),
+      openNewTab:icon.getAttribute('data-open-newtab')==='true',
+      useFavicon:icon.getAttribute('data-use-favicon')==='true',
+      faviconUrl:icon.getAttribute('data-favicon-url')||null
     });
   });
-  localStorage.setItem('customApps', JSON.stringify(customApps));
+  localStorage.setItem('customApps',JSON.stringify(customApps));
 }
-
-function loadCustomApps() {
-  JSON.parse(localStorage.getItem('customApps') || '[]').forEach(app => {
-    if (document.querySelector(`.desktop-icon[data-app="${app.name}"]`)) return;
-    createCustomAppIcon(app.name, app.url, app.id, app.iconClass, app.openNewTab, app.useFavicon, app.faviconUrl);
+function loadCustomApps(){
+  JSON.parse(localStorage.getItem('customApps')||'[]').forEach(app=>{
+    if(document.querySelector(`.desktop-icon[data-app="${app.name}"]`)) return;
+    createCustomAppIcon(app.name,app.url,app.id,app.iconClass,app.openNewTab,app.useFavicon,app.faviconUrl);
   });
 }
 
 /* ---------- Custom icon creation ---------- */
-function createCustomAppIcon(name, url, id = null, iconClass = null, openNewTab = true, useFavicon = false, faviconUrl = null) {
-  const container = document.getElementById('desktop-icons-container');
-  const appId = id || `custom-${Date.now()}`;
-  if (container.querySelector(`[data-app-id="${appId}"]`)) return;
+function createCustomAppIcon(name,url,id=null,iconClass=null,openNewTab=true,useFavicon=false,faviconUrl=null){
+  const container=document.getElementById('desktop-icons-container');
+  const appId=id||`custom-${Date.now()}`;
+  if(container.querySelector(`[data-app-id="${appId}"]`)) return;
 
-  function getFaviconUrl(siteUrl) {
-    try { const u = new URL(siteUrl); return u.origin + '/favicon.ico'; }
-    catch { return ''; }
-  }
-  if (!iconClass && !useFavicon) {
-    const randomIcons = ['fa-window-maximize','fa-cube','fa-diamond','fa-star','fa-circle','fa-square','fa-heart','fa-flag','fa-bookmark','fa-bolt','fa-cloud','fa-gem','fa-car','fa-tree','fa-music','fa-camera','fa-user','fa-lock','fa-bicycle','fa-sun','fa-plane','fa-rocket'];
-    iconClass = randomIcons[Math.floor(Math.random() * randomIcons.length)];
+  function getFaviconUrl(siteUrl){ try{const u=new URL(siteUrl); return u.origin+'/favicon.ico';}catch{return '';} }
+  if(!iconClass && !useFavicon){
+    const random=['fa-window-maximize','fa-cube','fa-diamond','fa-star','fa-circle','fa-square','fa-heart','fa-flag','fa-bookmark','fa-bolt','fa-cloud','fa-gem','fa-car','fa-tree','fa-music','fa-camera','fa-user','fa-lock','fa-bicycle','fa-sun','fa-plane','fa-rocket'];
+    iconClass=random[Math.floor(Math.random()*random.length)];
   }
 
-  const icon = document.createElement('div');
-  icon.className = 'desktop-icon';
-  icon.setAttribute('data-app', name);
-  icon.setAttribute('data-app-type', 'custom');
-  icon.setAttribute('data-app-id', appId);
-  icon.setAttribute('data-url', url);
-  icon.setAttribute('data-open-newtab', openNewTab ? 'true' : 'false');
-  icon.setAttribute('data-use-favicon', useFavicon ? 'true' : 'false');
+  const icon=document.createElement('div');
+  icon.className='desktop-icon';
+  icon.setAttribute('data-app',name);
+  icon.setAttribute('data-app-type','custom');
+  icon.setAttribute('data-app-id',appId);
+  icon.setAttribute('data-url',url);
+  icon.setAttribute('data-open-newtab',openNewTab?'true':'false');
+  icon.setAttribute('data-use-favicon',useFavicon?'true':'false');
 
-  if (useFavicon) {
-    faviconUrl = faviconUrl || getFaviconUrl(url);
-    icon.setAttribute('data-favicon-url', faviconUrl);
-  } else {
-    icon.setAttribute('data-icon-class', iconClass);
+  if(useFavicon){
+    faviconUrl=faviconUrl||getFaviconUrl(url);
+    icon.setAttribute('data-favicon-url',faviconUrl);
+  }else{
+    icon.setAttribute('data-icon-class',iconClass);
   }
 
-  // Initial grid placement
-  const gridSize = 100;
-  const count = container.querySelectorAll('.desktop-icon').length;
-  const row = Math.floor(count / 4), col = count % 4;
-  icon.style.left = `${20 + col * gridSize}px`;
-  icon.style.top  = `${20 + row * gridSize}px`;
+  const g=100,count=container.querySelectorAll('.desktop-icon').length;
+  const row=Math.floor(count/4),col=count%4;
+  icon.style.left=`${20+col*g}px`; icon.style.top=`${20+row*g}px`;
 
-  // Render icon
-const iconImageHtml = useFavicon
-  ? `<img src="${faviconUrl || getFaviconUrl(url)}"
-           style="width:32px;height:32px;border-radius:6px;background:#fff;border:1px solid #ccc;object-fit:contain;"
-           onerror="this.outerHTML='<i class=&quot;fas fa-globe&quot;></i>'">`
-  : `<i class="fas ${iconClass}"></i>`;
+  const iconImageHtml = useFavicon
+    ? `<img src="${faviconUrl||getFaviconUrl(url)}" style="width:32px;height:32px;border-radius:6px;background:#fff;border:1px solid #ccc;object-fit:contain;" onerror="this.outerHTML='<i class=&quot;fas fa-globe&quot;></i>'">`
+    : `<i class="fas ${iconClass}"></i>`;
 
-icon.innerHTML = `
-  <div class="icon-image">${iconImageHtml}</div>
-  <div class="icon-label">${name}</div>
-`;
+  icon.innerHTML=`<div class="icon-image">${iconImageHtml}</div><div class="icon-label">${name}</div>`;
   container.appendChild(icon);
 
-  // Restore saved position if any
-  const saved = JSON.parse(localStorage.getItem('desktopIconPositions') || '{}');
-  if (saved[appId]) { icon.style.left = saved[appId].left; icon.style.top = saved[appId].top; }
+  const saved=JSON.parse(localStorage.getItem('desktopIconPositions')||'{}');
+  if(saved[appId]){ icon.style.left=saved[appId].left; icon.style.top=saved[appId].top; }
 
-  // Color prefs
-  const settings = JSON.parse(localStorage.getItem('desktopSettings') || '{}');
-  if (!useFavicon && settings.iconColor) icon.querySelector('.icon-image i').style.color = settings.iconColor;
-  if (settings.iconTextColor) icon.querySelector('.icon-label').style.color = settings.iconTextColor;
+  const settings=JSON.parse(localStorage.getItem('desktopSettings')||'{}');
+  if(!useFavicon && settings.iconColor) icon.querySelector('.icon-image i').style.color=settings.iconColor;
+  if(settings.iconTextColor) icon.querySelector('.icon-label').style.color=settings.iconTextColor;
 
-  // Wire behavior
   wireCustomIcon(icon);
   saveCustomApps();
-
+  // also rebuild Start grid to include the new app
+  buildStartMenu();
   return icon;
 }
 
-/* ---------- Context menu & modal ---------- */
-function initContextMenu() {
-  document.getElementById('context-new-app').addEventListener('click', () => { hideContextMenu(); showModal(); });
-  document.getElementById('context-delete-app').addEventListener('click', () => {
+/* ---------- Context menu & modal (Create/Edit/Delete) ---------- */
+function initContextMenu(){
+  document.getElementById('context-new-app').addEventListener('click',()=>{ hideContextMenu(); showModal(); });
+  document.getElementById('context-delete-app').addEventListener('click',()=>{
     hideContextMenu();
-    if (selectedIconForDeletion && selectedIconForDeletion.getAttribute('data-app-type') === 'custom') {
+    if(selectedIconForDeletion && selectedIconForDeletion.getAttribute('data-app-type')==='custom'){
       showDeleteDialog(selectedIconForDeletion);
-    } else {
-      showDeleteDialog(null);
-    }
+    }else showDeleteDialog(null);
   });
-  // NEW: Properties
-document.getElementById('context-edit-app').addEventListener('click', () => {
-  hideContextMenu();
-  if (selectedIconForDeletion && selectedIconForDeletion.getAttribute('data-app-type') === 'custom') {
-    showEditDialog(selectedIconForDeletion);
-  } else {
-    showEditDialog(null);
-  }
-});
-// NEW: Edit dialog (Properties)
-function showEditDialog(iconElement) {
-  let dialog = document.getElementById('edit-app-dialog');
-  if (dialog) dialog.remove();
 
-  dialog = document.createElement('div');
-  dialog.id = 'edit-app-dialog';
-  dialog.className = 'modal';
-  dialog.style.display = 'flex';
-
-  if (!iconElement) {
-    dialog.innerHTML = `
-      <div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,0.25); border-radius:12px; padding:0; min-width:340px; overflow:hidden;">
-        <div class="modal-header" style="background:linear-gradient(90deg,#6b7280 60%,#374151 100%); color:#fff; display:flex; align-items:center; gap:10px; padding:18px 24px 14px 24px; font-size:18px; font-weight:500;">
-          <i class="fas fa-info-circle" style="font-size:22px; opacity:.85;"></i> Properties
-        </div>
-        <div class="modal-body" style="padding:24px 24px 8px 24px;">
-          <div style="font-size:15px;color:#222;margin-bottom:10px;">Please select a custom app to edit.</div>
-        </div>
-        <div class="modal-footer" style="padding:16px 24px 20px 24px; background:#f3f6fa; display:flex; justify-content:flex-end; gap:12px;">
-          <button class="modal-btn secondary" id="edit-cancel-btn">Close</button>
-        </div>
-      </div>`;
-    document.body.appendChild(dialog);
-    document.getElementById('edit-cancel-btn').onclick = () => dialog.remove();
-    return;
-  }
-
-  const currentName = iconElement.getAttribute('data-app') || '';
-  const currentUrl  = iconElement.getAttribute('data-url') || '';
-
-  dialog.innerHTML = `
-    <div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,0.25); border-radius:12px; padding:0; min-width:380px; overflow:hidden;">
-      <div class="modal-header" style="background:linear-gradient(90deg,#6b7280 60%,#374151 100%); color:#fff; display:flex; align-items:center; gap:10px; padding:18px 24px 14px 24px; font-size:18px; font-weight:500;">
-        <i class="fas fa-info-circle" style="font-size:22px; opacity:.85;"></i> Properties
-      </div>
-      <div class="modal-body" style="padding:24px 24px 8px 24px;">
-        <div class="form-group" style="margin-bottom:18px;">
-          <label for="edit-app-name" style="font-size:15px; color:#222; margin-bottom:6px; font-weight:500;">App Name</label>
-          <input type="text" id="edit-app-name" value="${currentName.replace(/"/g,'&quot;')}"
-                 style="width:100%; padding:10px 12px; border:1.5px solid #c7c7c7; border-radius:6px; font-size:15px; background:#f7fafd;">
-        </div>
-        <div class="form-group" style="margin-bottom:8px;">
-          <label for="edit-app-url" style="font-size:15px; color:#222; margin-bottom:6px; font-weight:500;">App URL</label>
-          <input type="text" id="edit-app-url" value="${currentUrl.replace(/"/g,'&quot;')}"
-                 style="width:100%; padding:10px 12px; border:1.5px solid #c7c7c7; border-radius:6px; font-size:15px; background:#f7fafd;">
-        </div>
-      </div>
-      <div class="modal-footer" style="padding:16px 24px 20px 24px; background:#f3f6fa; display:flex; justify-content:flex-end; gap:12px;">
-        <button class="modal-btn secondary" id="edit-cancel-btn">Cancel</button>
-        <button class="modal-btn primary" id="edit-save-btn" style="background:linear-gradient(90deg,#0078d7 60%,#005fa3 100%);">Save</button>
-      </div>
-    </div>`;
-  document.body.appendChild(dialog);
-
-  document.getElementById('edit-cancel-btn').onclick = () => dialog.remove();
-  document.getElementById('edit-save-btn').onclick = () => {
-    const newName = (document.getElementById('edit-app-name').value || '').trim();
-    const newUrl  = (document.getElementById('edit-app-url').value  || '').trim();
-    if (!newName || !newUrl) { alert('Please enter both name and URL'); return; }
-    updateCustomApp(iconElement, newName, newUrl);
-    dialog.remove();
-  };
-
-  function updateCustomApp(iconEl, name, url) {
-    const appId = iconEl.getAttribute('data-app-id') || iconEl.getAttribute('data-app');
-
-    // update desktop icon attributes
-    iconEl.setAttribute('data-app', name);
-    iconEl.setAttribute('data-url', url);
-    iconEl.setAttribute('data-label', name);
-
-    // update visible label
-    const labelEl = iconEl.querySelector('.icon-label');
-    if (labelEl) { labelEl.textContent = name; labelEl.title = name; }
-
-    // refresh favicon if using favicon mode
-    if (iconEl.getAttribute('data-use-favicon') === 'true') {
-      let fav = '';
-      try { const u = new URL(url); fav = `${u.origin}/favicon.ico`; } catch {}
-      iconEl.setAttribute('data-favicon-url', fav);
-      const img = iconEl.querySelector('.icon-image img');
-      if (img) {
-        if (fav) {
-  img.src = fav;
-  img.onerror = function() {
-    // fallback: replace the image element with a Font Awesome icon
-    const parent = this.parentElement;
-    if (parent) {
-      parent.innerHTML = `<i class="fas fa-globe"></i>`; 
-    }
-  };
-} else {
-  // no favicon available at all → just use Font Awesome immediately
-  const parent = img.parentElement;
-  if (parent) {
-    parent.innerHTML = `<i class="fas fa-globe"></i>`;
-  }
-}
-      }
-    }
-
-    // if a window for this app is open, update title + iframe
-    const win = document.getElementById(`custom-${appId}-window`);
-    if (win) {
-      const titleEl = win.querySelector('.window-title');
-      if (titleEl) {
-        const iconNode = titleEl.querySelector('.window-icon');
-        const iconOuter = iconNode ? iconNode.outerHTML : '';
-        titleEl.innerHTML = `${iconOuter}${name}`;
-      }
-      const iframe = win.querySelector('iframe');
-      if (iframe) iframe.src = url;
-    }
-
-    // persist
-    saveCustomApps();
-  }
-}
-
-  document.getElementById('context-setting').addEventListener('click', () => {
+  document.getElementById('context-edit-app').addEventListener('click',()=>{
     hideContextMenu();
-    const def = AppRegistry.get('settings');
-    if (def) def.open(AppHost);
-  });
-  document.getElementById('context-toggle-taskbar').addEventListener('click', () => {
-    hideContextMenu();
-    const settings = JSON.parse(localStorage.getItem('desktopSettings') || '{}');
-    const current = settings.taskbarVisible !== false;
-    saveSettings({ taskbarVisible: !current });
-  });
-  document.getElementById('context-full-view').addEventListener('click', () => {
-    hideContextMenu();
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
+    if(selectedIconForDeletion && selectedIconForDeletion.getAttribute('data-app-type')==='custom'){
+      showEditDialog(selectedIconForDeletion);
+    }else showEditDialog(null);
   });
 
-  // New app modal
-  const openNewTabCheckbox = document.getElementById('app-open-newtab');
-  const openNewTabLabel = document.getElementById('app-open-newtab-label');
-  function updateOpenNewTabLabel() {
-    openNewTabLabel.childNodes[2].textContent = openNewTabCheckbox.checked ? 'Open in new tab' : 'Open within this desktop';
+  document.getElementById('context-setting').addEventListener('click',()=>{
+    hideContextMenu();
+    const def=AppRegistry.get('settings'); if(def) def.open(AppHost);
+  });
+  document.getElementById('context-toggle-taskbar').addEventListener('click',()=>{
+    hideContextMenu();
+    const s=JSON.parse(localStorage.getItem('desktopSettings')||'{}');
+    const cur=s.taskbarVisible!==false; saveSettings({taskbarVisible:!cur});
+  });
+  document.getElementById('context-full-view').addEventListener('click',()=>{
+    hideContextMenu();
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen();
+  });
+
+  const openNewTabCheckbox=document.getElementById('app-open-newtab');
+  const openNewTabLabel=document.getElementById('app-open-newtab-label');
+  function updateOpenNewTabLabel(){
+    openNewTabLabel.childNodes[2].textContent=openNewTabCheckbox.checked?'Open in new tab':'Open within this desktop';
   }
-  openNewTabCheckbox.addEventListener('change', updateOpenNewTabLabel);
-  document.getElementById('new-app-modal').addEventListener('show', updateOpenNewTabLabel);
+  openNewTabCheckbox.addEventListener('change',updateOpenNewTabLabel);
+  document.getElementById('new-app-modal').addEventListener('show',updateOpenNewTabLabel);
 
-  document.getElementById('modal-ok').addEventListener('click', () => {
-    const appName = document.getElementById('app-name').value.trim();
-    const appUrl  = document.getElementById('app-url').value.trim();
-    const openNewTab = document.getElementById('app-open-newtab').checked;
-    const useFavicon = document.getElementById('app-use-favicon').checked;
-    if (!appName || !appUrl) { alert('Please enter both app name and URL'); return; }
-    createCustomAppIcon(appName, appUrl, null, null, openNewTab, useFavicon);
+  document.getElementById('modal-ok').addEventListener('click',()=>{
+    const appName=document.getElementById('app-name').value.trim();
+    const appUrl=document.getElementById('app-url').value.trim();
+    const openNewTab=document.getElementById('app-open-newtab').checked;
+    const useFavicon=document.getElementById('app-use-favicon').checked;
+    if(!appName||!appUrl){ alert('Please enter both app name and URL'); return; }
+    createCustomAppIcon(appName,appUrl,null,null,openNewTab,useFavicon);
     hideModal();
   });
-  document.getElementById('modal-cancel').addEventListener('click', hideModal);
+  document.getElementById('modal-cancel').addEventListener('click',hideModal);
+}
+function positionStartMenu() {
+  const menu = document.querySelector('.start-menu');
+  const btn  = document.getElementById('start-button');
+  const task = document.getElementById('taskbar');
+  if (!menu || !btn || !task) return;
+
+  // Layout constants
+  const sideMargin = 8;   // clamp from screen edges
+  const gapAbove   = 6;   // small gap above taskbar
+
+  // Measure
+  const btnRect  = btn.getBoundingClientRect();
+  const taskRect = task.getBoundingClientRect();
+  const vw = document.documentElement.clientWidth;
+
+  // Ensure menu has a width to measure (temporarily show if needed)
+  const wasHidden = getComputedStyle(menu).display === 'none';
+  if (wasHidden) { menu.style.visibility = 'hidden'; menu.style.display = 'flex'; }
+
+  const menuWidth = menu.getBoundingClientRect().width;
+
+  // Center the menu horizontally to the Start button
+  let left = btnRect.left + (btnRect.width / 2) - (menuWidth / 2);
+
+  // Clamp inside viewport with a small margin
+  left = Math.max(sideMargin, Math.min(left, vw - menuWidth - sideMargin));
+
+  // Place it just above the taskbar
+  const bottom = (window.innerHeight - taskRect.top) + gapAbove;
+
+  // Apply
+  menu.style.left   = `${left}px`;
+  menu.style.bottom = `${bottom}px`;
+
+  if (wasHidden) { menu.style.display = 'none'; menu.style.visibility = ''; }
 }
 
-function showDeleteDialog(iconElement) {
-  let dialog = document.getElementById('delete-app-dialog');
-  if (dialog) dialog.remove();
-  dialog = document.createElement('div');
-  dialog.id = 'delete-app-dialog';
-  dialog.className = 'modal';
-  dialog.style.display = 'flex';
-  dialog.innerHTML = `
-    <div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,.25); border-radius:12px; padding:0; min-width:340px; overflow:hidden;">
-      <div class="modal-header" style="background:linear-gradient(90deg,#e81123 60%,#a80000 100%); color:#fff; display:flex; align-items:center; gap:10px; padding:18px 24px 14px 24px; font-size:18px; font-weight:500;">
-        <i class="fas fa-trash-alt" style="font-size:22px; opacity:.85;"></i> Delete App
+function showEditDialog(iconElement){
+  let dialog=document.getElementById('edit-app-dialog'); if(dialog) dialog.remove();
+  dialog=document.createElement('div'); dialog.id='edit-app-dialog'; dialog.className='modal'; dialog.style.display='flex';
+
+  if(!iconElement){
+    dialog.innerHTML=`<div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,.25);border-radius:12px;padding:0;min-width:340px;overflow:hidden;">
+      <div class="modal-header" style="background:linear-gradient(90deg,#6b7280 60%,#374151 100%);color:#fff;display:flex;align-items:center;gap:10px;padding:18px 24px 14px 24px;font-size:18px;font-weight:500">
+        <i class="fas fa-info-circle" style="font-size:22px;opacity:.85"></i> Properties
       </div>
-      <div class="modal-body" style="padding:24px 24px 8px 24px;">
-        ${
-          iconElement
-          ? `<div style="font-size:15px;color:#222;margin-bottom:10px;">Delete <b>${iconElement.getAttribute('data-app')}</b> from your desktop?</div>`
-          : `<div style="font-size:15px;color:#222;margin-bottom:10px;">Select a custom app to delete.</div>`
-        }
+      <div class="modal-body" style="padding:24px 24px 8px 24px">Please select a custom app to edit.</div>
+      <div class="modal-footer" style="padding:16px 24px 20px 24px;background:#f3f6fa;display:flex;justify-content:flex-end;gap:12px">
+        <button class="modal-btn secondary" id="edit-cancel-btn">Close</button>
+      </div></div>`;
+    document.body.appendChild(dialog);
+    document.getElementById('edit-cancel-btn').onclick=()=>dialog.remove();
+    return;
+  }
+  const currentName=iconElement.getAttribute('data-app')||'';
+  const currentUrl=iconElement.getAttribute('data-url')||'';
+  dialog.innerHTML=`<div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,.25);border-radius:12px;padding:0;min-width:380px;overflow:hidden;">
+    <div class="modal-header" style="background:linear-gradient(90deg,#6b7280 60%,#374151 100%);color:#fff;display:flex;align-items:center;gap:10px;padding:18px 24px 14px 24px;font-size:18px;font-weight:500">
+      <i class="fas fa-info-circle" style="font-size:22px;opacity:.85"></i> Properties
+    </div>
+    <div class="modal-body" style="padding:24px 24px 8px 24px">
+      <div class="form-group" style="margin-bottom:18px">
+        <label for="edit-app-name" style="font-size:15px;color:#222;margin-bottom:6px;font-weight:500">App Name</label>
+        <input id="edit-app-name" value="${currentName.replace(/"/g,'&quot;')}" style="width:100%;padding:10px 12px;border:1.5px solid #c7c7c7;border-radius:6px;font-size:15px;background:#f7fafd">
       </div>
-      <div class="modal-footer" style="padding:16px 24px 20px 24px; background:#f3f6fa; display:flex; justify-content:flex-end; gap:12px;">
-        <button class="modal-btn secondary" id="delete-cancel-btn">Cancel</button>
-        ${ iconElement ? `<button class="modal-btn primary" id="delete-ok-btn" style="background:linear-gradient(90deg,#e81123 60%,#a80000 100%);">Delete</button>` : '' }
+      <div class="form-group" style="margin-bottom:8px">
+        <label for="edit-app-url" style="font-size:15px;color:#222;margin-bottom:6px;font-weight:500">App URL</label>
+        <input id="edit-app-url" value="${currentUrl.replace(/"/g,'&quot;')}" style="width:100%;padding:10px 12px;border:1.5px solid #c7c7c7;border-radius:6px;font-size:15px;background:#f7fafd">
       </div>
-    </div>`;
+    </div>
+    <div class="modal-footer" style="padding:16px 24px 20px 24px;background:#f3f6fa;display:flex;justify-content:flex-end;gap:12px">
+      <button class="modal-btn secondary" id="edit-cancel-btn">Cancel</button>
+      <button class="modal-btn primary" id="edit-save-btn" style="background:linear-gradient(90deg,#0078d7 60%,#005fa3 100%)">Save</button>
+    </div></div>`;
   document.body.appendChild(dialog);
-  document.getElementById('delete-cancel-btn').onclick = () => dialog.remove();
-  if (iconElement) document.getElementById('delete-ok-btn').onclick = () => { deleteCustomApp(iconElement); dialog.remove(); };
-}
+  document.getElementById('edit-cancel-btn').onclick=()=>dialog.remove();
+  document.getElementById('edit-save-btn').onclick=()=>{
+    const newName=(document.getElementById('edit-app-name').value||'').trim();
+    const newUrl=(document.getElementById('edit-app-url').value||'').trim();
+    if(!newName||!newUrl){ alert('Please enter both name and URL'); return; }
+    const appId=iconElement.getAttribute('data-app-id')||iconElement.getAttribute('data-app');
 
-function showContextMenu(x, y) {
-  const m = document.getElementById('context-menu');
-  m.style.display = 'block'; m.style.left = `${x}px`; m.style.top = `${y}px`;
+    iconElement.setAttribute('data-app',newName);
+    iconElement.setAttribute('data-url',newUrl);
+    iconElement.setAttribute('data-label',newName);
+    const labelEl=iconElement.querySelector('.icon-label'); if(labelEl){labelEl.textContent=newName; labelEl.title=newName;}
+
+    if(iconElement.getAttribute('data-use-favicon')==='true'){
+      let fav=''; try{const u=new URL(newUrl); fav=`${u.origin}/favicon.ico`;}catch{}
+      iconElement.setAttribute('data-favicon-url',fav);
+      const img=iconElement.querySelector('.icon-image img');
+      if(img){
+        if(fav){ img.src=fav; img.onerror=function(){ const p=this.parentElement; if(p){p.innerHTML=`<i class="fas fa-globe"></i>`;} }; }
+        else{ const p=img.parentElement; if(p){p.innerHTML=`<i class="fas fa-globe"></i>`;} }
+      }
+    }
+    const win=document.getElementById(`custom-${appId}-window`);
+    if(win){
+      const t=win.querySelector('.window-title'); if(t){ const ic=t.querySelector('.window-icon'); const icHtml=ic?ic.outerHTML:''; t.innerHTML=`${icHtml}${newName}`; }
+      const iframe=win.querySelector('iframe'); if(iframe) iframe.src=newUrl;
+    }
+    saveCustomApps();
+    buildStartMenu();
+    dialog.remove();
+  };
 }
+function showDeleteDialog(iconElement){
+  let dialog=document.getElementById('delete-app-dialog'); if(dialog) dialog.remove();
+  dialog=document.createElement('div'); dialog.id='delete-app-dialog'; dialog.className='modal'; dialog.style.display='flex';
+  dialog.innerHTML=`<div class="modal-content" style="box-shadow:0 8px 32px rgba(0,0,0,.25);border-radius:12px;padding:0;min-width:340px;overflow:hidden;">
+    <div class="modal-header" style="background:linear-gradient(90deg,#e81123 60%,#a80000 100%);color:#fff;display:flex;align-items:center;gap:10px;padding:18px 24px 14px 24px;font-size:18px;font-weight:500">
+      <i class="fas fa-trash-alt" style="font-size:22px;opacity:.85"></i> Delete App
+    </div>
+    <div class="modal-body" style="padding:24px 24px 8px 24px;">
+      ${iconElement?`Delete <b>${iconElement.getAttribute('data-app')}</b> from your desktop?`:'Select a custom app to delete.'}
+    </div>
+    <div class="modal-footer" style="padding:16px 24px 20px 24px;background:#f3f6fa;display:flex;justify-content:flex-end;gap:12px">
+      <button class="modal-btn secondary" id="delete-cancel-btn">Cancel</button>
+      ${iconElement?`<button class="modal-btn primary" id="delete-ok-btn" style="background:linear-gradient(90deg,#e81123 60%,#a80000 100%)">Delete</button>`:''}
+    </div></div>`;
+  document.body.appendChild(dialog);
+  document.getElementById('delete-cancel-btn').onclick=()=>dialog.remove();
+  if(iconElement) document.getElementById('delete-ok-btn').onclick=()=>{ deleteCustomApp(iconElement); dialog.remove(); };
+}
+function showContextMenu(x,y){ const m=document.getElementById('context-menu'); m.style.display='block'; m.style.left=`${x}px`; m.style.top=`${y}px`; }
 function hideContextMenu(){ document.getElementById('context-menu').style.display='none'; }
-
 function showModal(){
   document.getElementById('new-app-modal').style.display='flex';
-  document.getElementById('app-name').value='';
-  document.getElementById('app-url').value='';
-  const openNewTabCheckbox = document.getElementById('app-open-newtab');
-  const openNewTabLabel = document.getElementById('app-open-newtab-label');
-  openNewTabLabel.childNodes[2].textContent = openNewTabCheckbox.checked ? 'Open in new tab' : 'Open within this desktop';
+  document.getElementById('app-name').value=''; document.getElementById('app-url').value='';
+  const openNewTabCheckbox=document.getElementById('app-open-newtab');
+  const openNewTabLabel=document.getElementById('app-open-newtab-label');
+  openNewTabLabel.childNodes[2].textContent=openNewTabCheckbox.checked?'Open in new tab':'Open within this desktop';
 }
 function hideModal(){ document.getElementById('new-app-modal').style.display='none'; }
-
-function deleteCustomApp(iconElement) {
+function deleteCustomApp(iconElement){
+  const id=iconElement.getAttribute('data-app-id')||iconElement.getAttribute('data-app');
   iconElement.remove();
-  const taskbarApp = taskbarApps.querySelector(`[data-app="${iconElement.getAttribute('data-app-id')}"]`);
-  if (taskbarApp) taskbarApp.remove();
-  saveCustomApps();
-  selectedIconForDeletion = null;
+  const t=taskbarApps.querySelector(`[data-app="${id}"]`); if(t) t.remove();
+  const w=document.getElementById(`custom-${id}-window`); if(w) w.remove();
+  saveCustomApps(); selectedIconForDeletion=null; buildStartMenu();
 }
 
 /* ---------- Icon drag ---------- */
-function startIconDrag(e) {
-  if (e.button !== 0) return;
-  isIconDragging = true;
-  draggedIcon = e.currentTarget;
-  draggedIcon.classList.add('selected');
-  const rect = draggedIcon.getBoundingClientRect();
-  iconOffsetX = e.clientX - rect.left;
-  iconOffsetY = e.clientY - rect.top;
-  draggedIcon.style.zIndex = '1000';
-  draggedIcon.style.cursor = 'grabbing';
-  e.preventDefault();
+function startIconDrag(e){
+  if(e.button!==0) return;
+  isIconDragging=true; draggedIcon=e.currentTarget; draggedIcon.classList.add('selected');
+  const rect=draggedIcon.getBoundingClientRect(); iconOffsetX=e.clientX-rect.left; iconOffsetY=e.clientY-rect.top;
+  draggedIcon.style.zIndex='1000'; draggedIcon.style.cursor='grabbing'; e.preventDefault();
 }
-function dragIcon(e) {
-  if (!isIconDragging || !draggedIcon) return;
-  const desktopRect = document.querySelector('.desktop').getBoundingClientRect();
-  const taskbarHeight = taskbar.style.display === 'none' ? 0 : 48;
-  const x = e.clientX - desktopRect.left - iconOffsetX;
-  const y = e.clientY - desktopRect.top  - iconOffsetY;
-  draggedIcon.style.left = `${Math.max(0, Math.min(desktopRect.width  - 80, x))}px`;
-  draggedIcon.style.top  = `${Math.max(0, Math.min(desktopRect.height - taskbarHeight - 80, y))}px`;
+function dragIcon(e){
+  if(!isIconDragging||!draggedIcon) return;
+  const desktopRect=document.querySelector('.desktop').getBoundingClientRect();
+  const taskbarHeight=taskbar.style.display==='none'?0:48;
+  const x=e.clientX-desktopRect.left-iconOffsetX;
+  const y=e.clientY-desktopRect.top-iconOffsetY;
+  draggedIcon.style.left=`${Math.max(0,Math.min(desktopRect.width-80,x))}px`;
+  draggedIcon.style.top =`${Math.max(0,Math.min(desktopRect.height-taskbarHeight-80,y))}px`;
 }
-function stopIconDrag() {
-  if (!isIconDragging) return;
-  isIconDragging = false;
-  if (draggedIcon) {
-    draggedIcon.style.zIndex = '';
-    draggedIcon.style.cursor = 'pointer';
-    saveIconPositions();
-    draggedIcon = null;
-  }
+function stopIconDrag(){
+  if(!isIconDragging) return;
+  isIconDragging=false;
+  if(draggedIcon){ draggedIcon.style.zIndex=''; draggedIcon.style.cursor='pointer'; saveIconPositions(); draggedIcon=null; }
 }
 
 /* ---------- Windowing ---------- */
-function addToTaskbar(app, appWindow) {
-  const existing = taskbarApps.querySelector(`[data-app="${app}"]`);
-  if (existing) {
-    document.querySelectorAll('.taskbar-app').forEach(a => a.classList.remove('active'));
-    existing.classList.add('active'); return;
-  }
-  const taskbarApp = document.createElement('div');
-  taskbarApp.className = 'taskbar-app';
-  taskbarApp.setAttribute('data-app', app);
-
-  // try desktop icon (custom or built-in)
-  const desktopIcon = document.querySelector(`.desktop-icon[data-app-id="${app}"]`) || document.querySelector(`.desktop-icon[data-app="${app}"]`);
-  let iconHtml = desktopIcon ? desktopIcon.querySelector('.icon-image').innerHTML : '<i class="fas fa-window-maximize"></i>';
-  taskbarApp.innerHTML = iconHtml;
-
-  taskbarApp.addEventListener('click', () => {
-    const win = document.querySelector(`.window[data-app="${app}"]`);
-    if (!win) return;
-    if (win.style.display === 'flex') minimizeWindow(win);
-    else { win.style.display='flex'; bringToFront(win); }
+function addToTaskbar(app){ 
+  const existing=taskbarApps.querySelector(`[data-app="${app}"]`);
+  if(existing){ document.querySelectorAll('.taskbar-app').forEach(a=>a.classList.remove('active')); existing.classList.add('active'); return; }
+  const taskbarApp=document.createElement('div'); taskbarApp.className='taskbar-app'; taskbarApp.setAttribute('data-app',app);
+  const desktopIcon=document.querySelector(`.desktop-icon[data-app-id="${app}"]`)||document.querySelector(`.desktop-icon[data-app="${app}"]`);
+  let iconHtml=desktopIcon?desktopIcon.querySelector('.icon-image').innerHTML:'<i class="fas fa-window-maximize"></i>';
+  taskbarApp.innerHTML=iconHtml;
+  taskbarApp.addEventListener('click',()=>{
+    const win=document.querySelector(`.window[data-app="${app}"]`); if(!win) return;
+    if(win.style.display==='flex') minimizeWindow(win); else{ win.style.display='flex'; bringToFront(win); }
   });
-
-  taskbarApps.appendChild(taskbarApp);
+  taskbarApps.appendChild(taskbarApp); document.querySelectorAll('.taskbar-app').forEach(a=>a.classList.remove('active')); taskbarApp.classList.add('active');
+}
+function bringToFront(win){
+  win.style.zIndex=zIndex++; activeWindow=win;
+  const app=win.getAttribute('data-app');
   document.querySelectorAll('.taskbar-app').forEach(a=>a.classList.remove('active'));
-  taskbarApp.classList.add('active');
+  const t=taskbarApps.querySelector(`[data-app="${app}"]`); if(t) t.classList.add('active');
 }
-
-function bringToFront(win) {
-  win.style.zIndex = zIndex++;
-  activeWindow = win;
-  const app = win.getAttribute('data-app');
-  document.querySelectorAll('.taskbar-app').forEach(a => a.classList.remove('active'));
-  const t = taskbarApps.querySelector(`[data-app="${app}"]`);
-  if (t) t.classList.add('active');
+function addWindowControls(win){
+  if(win._controlsInitialized) return; win._controlsInitialized=true;
+  const header=win.querySelector('.window-header');
+  const minimizeBtn=win.querySelector('.minimize');
+  const maximizeBtn=win.querySelector('.maximize');
+  const closeBtn=win.querySelector('.close');
+  const resizeHandle=win.querySelector('.window-resize-handle');
+  header.addEventListener('mousedown',dragStart);
+  minimizeBtn.addEventListener('click',()=>minimizeWindow(win));
+  maximizeBtn.addEventListener('click',()=>toggleMaximizeWindow(win));
+  closeBtn.addEventListener('click',()=>closeWindow(win));
+  resizeHandle.addEventListener('mousedown',resizeStart);
+  win.addEventListener('mousedown',e=>{ if(!e.target.closest('.window-controls')) bringToFront(win); });
 }
-
-function addWindowControls(win) {
-  if (win._controlsInitialized) return;
-  win._controlsInitialized = true;
-
-  const header = win.querySelector('.window-header');
-  const minimizeBtn = win.querySelector('.minimize');
-  const maximizeBtn = win.querySelector('.maximize');
-  const closeBtn    = win.querySelector('.close');
-  const resizeHandle= win.querySelector('.window-resize-handle');
-
-  header.addEventListener('mousedown', dragStart);
-  minimizeBtn.addEventListener('click', () => minimizeWindow(win));
-  maximizeBtn.addEventListener('click', () => toggleMaximizeWindow(win));
-  closeBtn.addEventListener('click', () => closeWindow(win));
-  resizeHandle.addEventListener('mousedown', resizeStart);
-  win.addEventListener('mousedown', (e) => { if (!e.target.closest('.window-controls')) bringToFront(win); });
+function dragStart(e){
+  if(e.target.closest('.window-control')) return;
+  const win=e.currentTarget.closest('.window'); isDragging=true; activeWindow=win;
+  offsetX=e.clientX-win.getBoundingClientRect().left; offsetY=e.clientY-win.getBoundingClientRect().top;
+  win.style.cursor='grabbing'; document.addEventListener('mousemove',drag); document.addEventListener('mouseup',dragEnd);
 }
-function dragStart(e) {
-  if (e.target.closest('.window-control')) return;
-  const win = e.currentTarget.closest('.window');
-  isDragging = true;
-  activeWindow = win;
-  offsetX = e.clientX - win.getBoundingClientRect().left;
-  offsetY = e.clientY - win.getBoundingClientRect().top;
-  win.style.cursor = 'grabbing';
-  document.addEventListener('mousemove', drag);
-  document.addEventListener('mouseup', dragEnd);
+function drag(e){
+  if(!isDragging) return; const win=activeWindow;
+  let x=e.clientX-offsetX; let y=e.clientY-offsetY;
+  const desktopRect=document.querySelector('.desktop').getBoundingClientRect();
+  const windowRect=win.getBoundingClientRect(); const taskbarHeight=taskbar.style.display==='none'?0:48;
+  if(x<0) x=0; if(y<0) y=0;
+  if(x+windowRect.width>desktopRect.width) x=desktopRect.width-windowRect.width;
+  if(y+windowRect.height>desktopRect.height-taskbarHeight) y=desktopRect.height-taskbarHeight-windowRect.height;
+  win.style.left=`${x}px`; win.style.top=`${y}px`;
 }
-function drag(e) {
-  if (!isDragging) return;
-  const win = activeWindow;
-  let x = e.clientX - offsetX;
-  let y = e.clientY - offsetY;
-  const desktopRect = document.querySelector('.desktop').getBoundingClientRect();
-  const windowRect = win.getBoundingClientRect();
-  const taskbarHeight = taskbar.style.display === 'none' ? 0 : 48;
-  if (x < 0) x = 0;
-  if (y < 0) y = 0;
-  if (x + windowRect.width  > desktopRect.width ) x = desktopRect.width  - windowRect.width;
-  if (y + windowRect.height > desktopRect.height - taskbarHeight) y = desktopRect.height - taskbarHeight - windowRect.height;
-  win.style.left = `${x}px`; win.style.top = `${y}px`;
+function dragEnd(){ isDragging=false; if(activeWindow) activeWindow.style.cursor='default'; document.removeEventListener('mousemove',drag); document.removeEventListener('mouseup',dragEnd); }
+function resizeStart(e){
+  const win=e.currentTarget.closest('.window'); activeWindow=win; isResizing=true;
+  initialWidth=win.offsetWidth; initialHeight=win.offsetHeight; initialMouseX=e.clientX; initialMouseY=e.clientY;
+  win.classList.add('resizing'); document.addEventListener('mousemove',resize); document.addEventListener('mouseup',resizeEnd);
 }
-function dragEnd() {
-  isDragging = false;
-  if (activeWindow) activeWindow.style.cursor = 'default';
-  document.removeEventListener('mousemove', drag);
-  document.removeEventListener('mouseup', dragEnd);
+function resize(e){
+  if(!isResizing) return; const win=activeWindow;
+  const w=initialWidth+(e.clientX-initialMouseX); const h=initialHeight+(e.clientY-initialMouseY);
+  if(w>=300) win.style.width=`${w}px`; if(h>=200) win.style.height=`${h}px`;
 }
-function resizeStart(e) {
-  const win = e.currentTarget.closest('.window');
-  activeWindow = win;
-  isResizing = true;
-  initialWidth = win.offsetWidth; initialHeight = win.offsetHeight;
-  initialMouseX = e.clientX; initialMouseY = e.clientY;
-  win.classList.add('resizing');
-  document.addEventListener('mousemove', resize);
-  document.addEventListener('mouseup', resizeEnd);
+function resizeEnd(){ isResizing=false; if(activeWindow) activeWindow.classList.remove('resizing'); document.removeEventListener('mousemove',resize); document.removeEventListener('mouseup',resizeEnd); }
+function minimizeWindow(win){ win.style.display='none'; const app=win.getAttribute('data-app'); const t=taskbarApps.querySelector(`[data-app="${app}"]`); if(t) t.classList.remove('active'); }
+function toggleMaximizeWindow(win){
+  if(win.classList.contains('maximized')){ win.classList.remove('maximized'); win.querySelector('.maximize i').className='fas fa-square'; }
+  else{ win.classList.add('maximized'); win.querySelector('.maximize i').className='fas fa-clone'; }
 }
-function resize(e) {
-  if (!isResizing) return;
-  const win = activeWindow;
-  const w = initialWidth  + (e.clientX - initialMouseX);
-  const h = initialHeight + (e.clientY - initialMouseY);
-  if (w >= 300) win.style.width  = `${w}px`;
-  if (h >= 200) win.style.height = `${h}px`;
-}
-function resizeEnd() {
-  isResizing = false;
-  if (activeWindow) activeWindow.classList.remove('resizing');
-  document.removeEventListener('mousemove', resize);
-  document.removeEventListener('mouseup', resizeEnd);
-}
-function minimizeWindow(win) {
-  win.style.display = 'none';
-  const app = win.getAttribute('data-app');
-  const t = taskbarApps.querySelector(`[data-app="${app}"]`);
-  if (t) t.classList.remove('active');
-}
-function toggleMaximizeWindow(win) {
-  if (win.classList.contains('maximized')) {
-    win.classList.remove('maximized');
-    win.querySelector('.maximize i').className = 'fas fa-square';
-  } else {
-    win.classList.add('maximized');
-    win.querySelector('.maximize i').className = 'fas fa-clone';
-  }
-}
-function closeWindow(win) {
-  win.style.display='none';
-  const app = win.getAttribute('data-app');
-  const t = taskbarApps.querySelector(`[data-app="${app}"]`);
-  if (t) t.remove();
-  // remove custom/built-in windows alike; apps can reopen on demand
-  win.remove();
+function closeWindow(win){
+  win.style.display='none'; const app=win.getAttribute('data-app'); const t=taskbarApps.querySelector(`[data-app="${app}"]`); if(t) t.remove(); win.remove();
 }
 
 /* ---------- Clock ---------- */
-function updateDateTime() {
-  const now = new Date();
-  desktopTime.textContent = now.toLocaleTimeString('en-US',{hour:'numeric', minute:'numeric', hour12:true});
-  desktopDate.textContent = now.toLocaleDateString('en-US',{month:'numeric', day:'numeric', year:'numeric'});
+function updateDateTime(){
+  const now=new Date();
+  desktopTime.textContent=now.toLocaleTimeString('en-US',{hour:'numeric',minute:'numeric',hour12:true});
+  desktopDate.textContent=now.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'numeric'});
 }
 
 /* ---------- Analog Clock ---------- */
-function drawAnalogClock() {
-  const canvas = document.getElementById('analog-clock');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  const r = w/2;
-  ctx.clearRect(0, 0, w, h);
-
-  // Draw face
-  ctx.save();
-  ctx.translate(r, r);
-  ctx.beginPath();
-  ctx.arc(0, 0, r-4, 0, 2*Math.PI);
-  ctx.fillStyle = '#fff';
-  ctx.globalAlpha = 0.92;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = '#222';
-  ctx.stroke();
-
-  // Draw hour marks
-  for (let i=0; i<12; i++) {
-    ctx.save();
-    ctx.rotate(i * Math.PI/6);
-    ctx.beginPath();
-    ctx.moveTo(0, -r+16);
-    ctx.lineTo(0, -r+6);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#222';
-    ctx.stroke();
-    ctx.restore();
-  }
-  // Draw minute marks
-  for (let i=0; i<60; i++) {
-    if (i%5 === 0) continue;
-    ctx.save();
-    ctx.rotate(i * Math.PI/30);
-    ctx.beginPath();
-    ctx.moveTo(0, -r+12);
-    ctx.lineTo(0, -r+6);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = '#888';
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // Draw hands
-  const now = new Date();
-  let hour = now.getHours();
-  let min = now.getMinutes();
-  let sec = now.getSeconds();
-
-  // Hour hand
-  ctx.save();
-  ctx.rotate(((hour%12) + min/60) * Math.PI/6);
-  ctx.beginPath();
-  ctx.moveTo(0, 8);
-  ctx.lineTo(0, -r+38);
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = '#222';
-  ctx.lineCap = 'round';
-  ctx.stroke();
-  ctx.restore();
-
-  // Minute hand
-  ctx.save();
-  ctx.rotate((min + sec/60) * Math.PI/30);
-  ctx.beginPath();
-  ctx.moveTo(0, 14);
-  ctx.lineTo(0, -r+24);
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = '#0078d7';
-  ctx.lineCap = 'round';
-  ctx.stroke();
-  ctx.restore();
-
-  // Second hand
-  ctx.save();
-  ctx.rotate(sec * Math.PI/30);
-  ctx.beginPath();
-  ctx.moveTo(0, 18);
-  ctx.lineTo(0, -r+16);
-  ctx.lineWidth = 1.5;
-  ctx.strokeStyle = '#e81123';
-  ctx.stroke();
-  ctx.restore();
-
-  // Center dot
-  ctx.beginPath();
-  ctx.arc(0,0,4,0,2*Math.PI);
-  ctx.fillStyle = '#0078d7';
-  ctx.fill();
-
+function drawAnalogClock(){
+  const canvas=document.getElementById('analog-clock'); if(!canvas) return;
+  const ctx=canvas.getContext('2d'); const w=canvas.width,h=canvas.height; const r=w/2;
+  ctx.clearRect(0,0,w,h); ctx.save(); ctx.translate(r,r);
+  ctx.beginPath(); ctx.arc(0,0,r-4,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.globalAlpha=.92; ctx.fill(); ctx.globalAlpha=1; ctx.lineWidth=2; ctx.strokeStyle='#222'; ctx.stroke();
+  for(let i=0;i<12;i++){ ctx.save(); ctx.rotate(i*Math.PI/6); ctx.beginPath(); ctx.moveTo(0,-r+16); ctx.lineTo(0,-r+6); ctx.lineWidth=3; ctx.strokeStyle='#222'; ctx.stroke(); ctx.restore(); }
+  for(let i=0;i<60;i++){ if(i%5===0) continue; ctx.save(); ctx.rotate(i*Math.PI/30); ctx.beginPath(); ctx.moveTo(0,-r+12); ctx.lineTo(0,-r+6); ctx.lineWidth=1; ctx.strokeStyle='#888'; ctx.stroke(); ctx.restore(); }
+  const now=new Date(); let hour=now.getHours(),min=now.getMinutes(),sec=now.getSeconds();
+  ctx.save(); ctx.rotate(((hour%12)+min/60)*Math.PI/6); ctx.beginPath(); ctx.moveTo(0,8); ctx.lineTo(0,-r+38); ctx.lineWidth=5; ctx.strokeStyle='#222'; ctx.lineCap='round'; ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.rotate((min+sec/60)*Math.PI/30); ctx.beginPath(); ctx.moveTo(0,14); ctx.lineTo(0,-r+24); ctx.lineWidth=3; ctx.strokeStyle='#0078d7'; ctx.lineCap='round'; ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.rotate(sec*Math.PI/30); ctx.beginPath(); ctx.moveTo(0,18); ctx.lineTo(0,-r+16); ctx.lineWidth=1.5; ctx.strokeStyle='#e81123'; ctx.stroke(); ctx.restore();
+  ctx.beginPath(); ctx.arc(0,0,4,0,2*Math.PI); ctx.fillStyle='#0078d7'; ctx.fill();
   ctx.restore();
 }
-setInterval(drawAnalogClock, 1000);
-drawAnalogClock();
-/* ---------- End Analog Clock ---------- */
+setInterval(drawAnalogClock,1000); drawAnalogClock();
 
 /* ---------- Analog Clock Toggle ---------- */
-(function analogClockToggleInit() {
-  const clock = document.getElementById('analog-clock');
-  const btn = document.getElementById('clock-toggle-btn');
-  if (!clock || !btn) return;
-
-  // Load state from localStorage
-  let visible = true;
-  try {
-    visible = localStorage.getItem('analogClockVisible') !== 'false';
-  } catch {}
-  function updateClockVisibility() {
-    if (visible) {
-      clock.classList.remove('hidden');
-      btn.style.opacity = '';
-      btn.title = 'Hide analog clock';
-      btn.setAttribute('aria-label', 'Hide analog clock');
-      btn.querySelector('i').className = 'far fa-clock';
-    } else {
-      clock.classList.add('hidden');
-      btn.style.opacity = '0.5';
-      btn.title = 'Show analog clock';
-      btn.setAttribute('aria-label', 'Show analog clock');
-      btn.querySelector('i').className = 'far fa-eye-slash';
-    }
-  }
-  btn.addEventListener('click', function(e) {
-    visible = !visible;
-    localStorage.setItem('analogClockVisible', visible ? 'true' : 'false');
-    updateClockVisibility();
-  });
-  // Keyboard accessibility
-  btn.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      btn.click();
-    }
-  });
-  updateClockVisibility();
+(function analogClockToggleInit(){
+  const clock=document.getElementById('analog-clock');
+  const btn=document.getElementById('clock-toggle-btn');
+  if(!clock||!btn) return;
+  let visible=true; try{ visible=localStorage.getItem('analogClockVisible')!=='false'; }catch{}
+  function updateV(){ if(visible){ clock.classList.remove('hidden'); btn.style.opacity=''; btn.title='Hide analog clock'; btn.setAttribute('aria-label','Hide analog clock'); btn.querySelector('i').className='far fa-clock'; } else { clock.classList.add('hidden'); btn.style.opacity='0.5'; btn.title='Show analog clock'; btn.setAttribute('aria-label','Show analog clock'); btn.querySelector('i').className='far fa-eye-slash'; } }
+  btn.addEventListener('click',function(){ visible=!visible; localStorage.setItem('analogClockVisible',visible?'true':'false'); updateV(); });
+  btn.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); btn.click(); }});
+  updateV();
 })();
-/* ---------- End Analog Clock Toggle ---------- */
 
 /* ---------- Settings persistence ---------- */
-function applySettings() {
-  const s = JSON.parse(localStorage.getItem('desktopSettings') || '{}');
-  if (s.iconColor)     document.querySelectorAll('.desktop-icon .icon-image i, .desktop-icon .icon-image svg').forEach(i => i.style.color = s.iconColor);
-  if (s.iconTextColor) document.querySelectorAll('.desktop-icon .icon-label').forEach(l => l.style.color = s.iconTextColor);
-
-  if (s.wallpaperType === 'image' && s.wallpaper)
-    document.querySelector('.desktop-background').style.background = `url('${s.wallpaper}') center/cover no-repeat`;
-  else if (s.wallpaperType === 'solid' && s.wallpaperSolid)
-    document.querySelector('.desktop-background').style.background = s.wallpaperSolid;
-
-  taskbar.style.display = s.taskbarVisible === false ? 'none' : 'flex';
-  document.body.classList.toggle('taskbar-hidden', s.taskbarVisible === false);
+function applySettings(){
+  const s=JSON.parse(localStorage.getItem('desktopSettings')||'{}');
+  if(s.iconColor) document.querySelectorAll('.desktop-icon .icon-image i, .desktop-icon .icon-image svg').forEach(i=>i.style.color=s.iconColor);
+  if(s.iconTextColor) document.querySelectorAll('.desktop-icon .icon-label').forEach(l=>l.style.color=s.iconTextColor);
+  if(s.wallpaperType==='image'&&s.wallpaper) document.querySelector('.desktop-background').style.background=`url('${s.wallpaper}') center/cover no-repeat`;
+  else if(s.wallpaperType==='solid'&&s.wallpaperSolid) document.querySelector('.desktop-background').style.background=s.wallpaperSolid;
+  taskbar.style.display=s.taskbarVisible===false?'none':'flex';
+  document.body.classList.toggle('taskbar-hidden',s.taskbarVisible===false);
 }
-function saveSettings(newSettings) {
-  const s = { ...JSON.parse(localStorage.getItem('desktopSettings') || '{}'), ...newSettings };
-  localStorage.setItem('desktopSettings', JSON.stringify(s));
-  applySettings();
+function saveSettings(newSettings){
+  const s={...JSON.parse(localStorage.getItem('desktopSettings')||'{}'),...newSettings};
+  localStorage.setItem('desktopSettings',JSON.stringify(s)); applySettings();
 }
 
 /* ---------- System tray popup ---------- */
 function bootstrapSystemTray(){
-  if (!document.getElementById('system-tray-popup')) {
-    const popup = document.createElement('div');
-    popup.id = 'system-tray-popup';
+  if(!document.getElementById('system-tray-popup')){
+    const popup=document.createElement('div');
+    popup.id='system-tray-popup';
     popup.style.position='fixed'; popup.style.display='none';
     popup.style.background='rgba(40,40,40,.97)'; popup.style.color='#fff';
     popup.style.padding='10px 18px'; popup.style.borderRadius='8px';
     popup.style.boxShadow='0 4px 16px rgba(0,0,0,.18)';
     popup.style.fontSize='15px'; popup.style.zIndex=3000; popup.style.userSelect='none';
-popup.innerHTML = `
-  <div style="display:flex;align-items:center;gap:8px;font-weight:500;font-size:14px;">
-    <span style="display:inline-flex;align-items:center;justify-content:center;
-                 width:22px;height:22px;border-radius:50%;
-                 background:linear-gradient(135deg,#ff4e50,#f9d423);
-                 color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-      <i class="fas fa-heart"></i>
-    </span>
-    <span style="color:#eee;">Built with <strong style="color:#ff6b6b;">love</strong> by <span style="color:#4dabf7;">WWO [H.Ng]</span></span>
-  </div>
-  <div style="margin-top:4px;font-size:12px;color:#aaa;text-align:right;">
-    © ${new Date().getFullYear()} Sewer Desktop
-  </div>
-`;
+    popup.innerHTML=`<div style="display:flex;align-items:center;gap:8px;font-weight:500;font-size:14px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#ff4e50,#f9d423);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2)">
+        <i class="fas fa-heart"></i>
+      </span>
+      <span style="color:#eee;">Built with <strong style="color:#ff6b6b;">love</strong> by <span style="color:#4dabf7;">WWO [H.Ng]</span></span>
+    </div>
+    <div style="margin-top:4px;font-size:12px;color:#aaa;text-align:right;">© ${new Date().getFullYear()} Sewer Desktop</div>`;
     document.body.appendChild(popup);
   }
-  const systemTray = document.querySelector('.system-tray');
-  const trayPopup  = document.getElementById('system-tray-popup');
-  systemTray.addEventListener('click', function(e){
+const systemTray = document.querySelector('.system-tray');
+const trayPopup  = document.getElementById('system-tray-popup');
+const aboutBtn   = document.getElementById('tray-about-text');
+  aboutBtn.addEventListener('click',function(e){
     e.stopPropagation();
-    const rect = systemTray.getBoundingClientRect();
+    const rect=systemTray.getBoundingClientRect();
     trayPopup.style.display='block';
-    trayPopup.style.left = (rect.right - trayPopup.offsetWidth - 8) + 'px';
-    trayPopup.style.top  = (rect.top   - trayPopup.offsetHeight - 10) + 'px';
-    if (rect.top - trayPopup.offsetHeight - 10 < 0) {
-      trayPopup.style.top = (rect.bottom + 10) + 'px';
-    }
+    trayPopup.style.left=(rect.right-trayPopup.offsetWidth-8)+'px';
+    trayPopup.style.top =(rect.top-trayPopup.offsetHeight-10)+'px';
+    if(rect.top-trayPopup.offsetHeight-10<0){ trayPopup.style.top=(rect.bottom+10)+'px'; }
   });
-  document.addEventListener('click', () => { trayPopup.style.display='none'; });
-  trayPopup.addEventListener('click', e => e.stopPropagation());
+
+  document.addEventListener('click',()=>{ trayPopup.style.display='none'; });
+  trayPopup.addEventListener('click',e=>e.stopPropagation());
 }
 
 /* ========= App SDK / Registry ========= */
-window.AppRegistry = {
-  _apps: new Map(),
+window.AppRegistry={
+  _apps:new Map(),
+  register(appDef){
+    if(!appDef||!appDef.id||!appDef.name||typeof appDef.open!=='function'){ console.warn('Invalid appDef',appDef); return; }
+    if(this._apps.has(appDef.id)) return;
+    this._apps.set(appDef.id,appDef);
 
-  register(appDef) {
-    if (!appDef || !appDef.id || !appDef.name || typeof appDef.open !== 'function') {
-      console.warn('Invalid appDef', appDef);
-      return;
-    }
-    if (this._apps.has(appDef.id)) return;
-    this._apps.set(appDef.id, appDef);
-
-    const mountIcon = () => {
-      const container = document.getElementById('desktop-icons-container');
-      if (!container) {
-        // wait until main.html is mounted by index.js
-        return setTimeout(mountIcon, 0);
-      }
-      // avoid duplicate desktop icon if already present (e.g., hot reload)
-      if (!container.querySelector(`.desktop-icon[data-app="${appDef.id}"]`)) {
-        createBuiltInAppIcon(appDef);
-      }
+    const mountIcon=()=>{
+      const container=document.getElementById('desktop-icons-container'); if(!container) return setTimeout(mountIcon,0);
+      if(!container.querySelector(`.desktop-icon[data-app="${appDef.id}"]`)){ createBuiltInAppIcon(appDef); }
+      // Keep Start menu in sync
+      buildStartMenu();
     };
     mountIcon();
   },
-
-  get(id) { return this._apps.get(id); }
+  get(id){ return this._apps.get(id); }
 };
+window.AppHost={
+  createWindow(opts){
+    const {id,title,width=Math.round(window.innerWidth*.7),height=Math.round(window.innerHeight*.7),icon}=opts||{};
+    const win=document.createElement('div'); win.className='window'; win.style.display='flex'; win.style.zIndex=(window.zIndex=(window.zIndex||10)+1);
+    win.style.width=width+'px'; win.style.height=height+'px';
+    win.style.left=`calc(50% - ${Math.floor(width/2)}px)`; win.style.top=`calc(50% - ${Math.floor(height/2)}px)`;
+    win.setAttribute('data-app',id); win.id=`builtin-${id}-window`;
 
+    const iconHtml = icon ? (
+      icon.type==='svg' ? `<span class="window-icon" style="width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center">${icon.value}</span>` :
+      icon.type==='fa'  ? `<i class="${icon.value} window-icon"></i>` :
+                          `<img class="window-icon" src="${icon.value}" style="width:16px;height:16px;border-radius:3px;object-fit:contain">`
+    ) : `<i class="fas fa-window-maximize window-icon"></i>`;
 
-window.AppHost = {
-  createWindow(opts) {
-    const {
-      id, title, width = Math.round(window.innerWidth * 0.7),
-      height = Math.round(window.innerHeight * 0.7), icon
-    } = opts || {};
-    const win = document.createElement('div');
-    win.className='window';
-    win.style.display='flex';
-    win.style.zIndex = (window.zIndex = (window.zIndex || 10) + 1);
-    win.style.width = width + 'px'; win.style.height = height + 'px';
-    win.style.left = `calc(50% - ${Math.floor(width/2)}px)`;
-    win.style.top  = `calc(50% - ${Math.floor(height/2)}px)`;
-    win.setAttribute('data-app', id);
-    win.id = `builtin-${id}-window`;
-
-const iconHtml = icon
-  ? (icon.type === 'svg'
-        ? `<span class="window-icon" style="width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center">${icon.value}</span>`
-     : icon.type === 'fa'
-        ? `<i class="${icon.value} window-icon"></i>`
-        : `<img class="window-icon" src="${icon.value}" style="width:16px;height:16px;border-radius:3px;object-fit:contain;">`)
-  : `<i class="fas fa-window-maximize window-icon"></i>`;
-
-
-    win.innerHTML = `
-      <div class="window-header">
+    win.innerHTML=`<div class="window-header">
         <div class="window-title">${iconHtml}${title}</div>
         <div class="window-controls">
           <div class="window-control minimize"><i class="fas fa-minus"></i></div>
@@ -1115,100 +941,60 @@ const iconHtml = icon
         </div>
       </div>
       <div class="window-content" style="padding:0;"></div>
-      <div class="window-resize-handle"></div>
-    `;
+      <div class="window-resize-handle"></div>`;
     document.querySelector('.desktop').appendChild(win);
-    addWindowControls(win);
-    addToTaskbar(id, win);
-    bringToFront(win);
-
-    return {
-      el: win,
-      contentEl: win.querySelector('.window-content'),
-      onClose(cb){ win.querySelector('.window-control.close').addEventListener('click', () => { try{cb();}catch(e){} }, { once:true }); }
-    };
+    addWindowControls(win); addToTaskbar(id,win); bringToFront(win);
+    return { el:win, contentEl:win.querySelector('.window-content'), onClose(cb){ win.querySelector('.window-control.close').addEventListener('click',()=>{ try{cb();}catch(e){} },{once:true}); } };
   },
   storage(namespace){
-    const key = `APP_${namespace}`;
-    return {
-      load(defaultValue){ try{ return JSON.parse(localStorage.getItem(key)) ?? defaultValue; } catch { return defaultValue; } },
-      save(obj){ localStorage.setItem(key, JSON.stringify(obj ?? {})); }
-    };
+    const key=`APP_${namespace}`;
+    return { load(def){ try{ return JSON.parse(localStorage.getItem(key)) ?? def; }catch{return def;} },
+             save(obj){ localStorage.setItem(key,JSON.stringify(obj??{})); } };
   }
 };
 
-function createBuiltInAppIcon(appDef) {
-  const container = document.getElementById('desktop-icons-container');
-  if (container.querySelector(`.desktop-icon[data-app="${appDef.id}"]`)) return;
+function createBuiltInAppIcon(appDef){
+  const container=document.getElementById('desktop-icons-container');
+  if(container.querySelector(`.desktop-icon[data-app="${appDef.id}"]`)) return;
 
-  const iconEl = document.createElement('div');
-  iconEl.className='desktop-icon';
-  iconEl.setAttribute('data-app', appDef.id);
+  const iconEl=document.createElement('div');
+  iconEl.className='desktop-icon'; iconEl.setAttribute('data-app',appDef.id);
 
-  // Grid default
-  const gridSize=100, count=container.querySelectorAll('.desktop-icon').length;
-  const row=Math.floor(count/4), col=count%4;
-  iconEl.style.left=`${20 + col*gridSize}px`;
-  iconEl.style.top =`${20 + row*gridSize}px`;
+  const g=100,count=container.querySelectorAll('.desktop-icon').length;
+  const row=Math.floor(count/4),col=count%4; iconEl.style.left=`${20+col*g}px`; iconEl.style.top=`${20+row*g}px`;
 
-  // Visual
-let iconImageHtml = '<i class="fas fa-sticky-note"></i>';
-if (appDef.icon) {
-  if (appDef.icon.type === 'svg') iconImageHtml = appDef.icon.value;
-  else if (appDef.icon.type === 'fa') iconImageHtml = `<i class="${appDef.icon.value}"></i>`;
-  else iconImageHtml = `<img src="${appDef.icon.value}" style="width:32px;height:32px;border-radius:6px;background:#fff;border:1px solid #ccc;object-fit:contain;">`;
-}
-  iconEl.innerHTML = `<div class="icon-image">${iconImageHtml}</div><div class="icon-label">${appDef.name}</div>`;
-
-  // Interactions
-  iconEl.addEventListener('dblclick', () => {
-    const def = AppRegistry.get(appDef.id);
-    if (def) def.open(AppHost);
-  });
-  iconEl.addEventListener('click', e => {
-    if (window.isIconDragging) return;
-    document.querySelectorAll('.desktop-icon').forEach(i=>i.classList.remove('selected'));
-    iconEl.classList.add('selected');
-    window.selectedIconForDeletion = null;
-  });
-  iconEl.addEventListener('mousedown', startIconDrag);
-
+  let iconImageHtml='<i class="fas fa-sticky-note"></i>';
+  if(appDef.icon){
+    if(appDef.icon.type==='svg') iconImageHtml=appDef.icon.value;
+    else if(appDef.icon.type==='fa') iconImageHtml=`<i class="${appDef.icon.value}"></i>`;
+    else iconImageHtml=`<img src="${appDef.icon.value}" style="width:32px;height:32px;border-radius:6px;background:#fff;border:1px solid #ccc;object-fit:contain">`;
+  }
+  iconEl.innerHTML=`<div class="icon-image">${iconImageHtml}</div><div class="icon-label">${appDef.name}</div>`;
+  iconEl.addEventListener('dblclick',()=>{ const def=AppRegistry.get(appDef.id); if(def) def.open(AppHost); });
+  iconEl.addEventListener('click',e=>{ if(window.isIconDragging) return; document.querySelectorAll('.desktop-icon').forEach(i=>i.classList.remove('selected')); iconEl.classList.add('selected'); window.selectedIconForDeletion=null; });
+  iconEl.addEventListener('mousedown',startIconDrag);
   container.appendChild(iconEl);
 
-  // Restore saved position if any
-  const saved = JSON.parse(localStorage.getItem('desktopIconPositions') || '{}');
-  const pos = saved[appDef.id];
-  if (pos) { iconEl.style.left = pos.left; iconEl.style.top = pos.top; }
+  const saved=JSON.parse(localStorage.getItem('desktopIconPositions')||'{}');
+  const pos=saved[appDef.id]; if(pos){ iconEl.style.left=pos.left; iconEl.style.top=pos.top; }
 
-  // Apply color prefs
-  const settings = JSON.parse(localStorage.getItem('desktopSettings') || '{}');
-  if (settings.iconColor) iconEl.querySelectorAll('.icon-image i, .icon-image svg').forEach(i => (i.style.color = settings.iconColor));
-  if (settings.iconTextColor) iconEl.querySelector('.icon-label').style.color = settings.iconTextColor;
+  const settings=JSON.parse(localStorage.getItem('desktopSettings')||'{}');
+  if(settings.iconColor) iconEl.querySelectorAll('.icon-image i, .icon-image svg').forEach(i=>i.style.color=settings.iconColor);
+  if(settings.iconTextColor) iconEl.querySelector('.icon-label').style.color=settings.iconTextColor;
 }
 
 /* ---------- Custom app window (embedded iframe) ---------- */
-function openCustomApp(appName, appUrl, appId) {
-  const id = appId;
-  const win = document.createElement('div');
-  win.className='window'; win.style.display='flex'; win.style.zIndex=(zIndex=zIndex+1);
-  const w=Math.round(window.innerWidth*.7), h=Math.round(window.innerHeight*.7);
-  win.style.width=w+'px'; win.style.height=h+'px';
-  win.style.left=`calc(50% - ${Math.floor(w/2)}px)`; win.style.top=`calc(50% - ${Math.floor(h/2)}px)`;
-  win.setAttribute('data-app', id);
-  win.id = `custom-${id}-window`;
+function openCustomApp(appName,appUrl,appId){
+  const id=appId; const win=document.createElement('div'); win.className='window'; win.style.display='flex'; win.style.zIndex=(zIndex=zIndex+1);
+  const w=Math.round(window.innerWidth*.7),h=Math.round(window.innerHeight*.7);
+  win.style.width=w+'px'; win.style.height=h+'px'; win.style.left=`calc(50% - ${Math.floor(w/2)}px)`; win.style.top=`calc(50% - ${Math.floor(h/2)}px)`;
+  win.setAttribute('data-app',id); win.id=`custom-${id}-window`;
 
-  // Try to use the icon shown on desktop
-  const deskIcon = document.querySelector(`.desktop-icon[data-app-id="${id}"]`);
-  let iconHtml = '<i class="fas fa-globe window-icon"></i>';
-  if (deskIcon) {
-    const img = deskIcon.querySelector('.icon-image img');
-    const i   = deskIcon.querySelector('.icon-image i');
-    if (img) iconHtml = `<img class="window-icon" src="${img.src}" style="width:16px;height:16px;border-radius:3px;background:#fff;border:1px solid #ccc;object-fit:contain;">`;
-    else if (i) iconHtml = `<i class="${i.className} window-icon"></i>`;
-  }
+  const deskIcon=document.querySelector(`.desktop-icon[data-app-id="${id}"]`);
+  let iconHtml='<i class="fas fa-globe window-icon"></i>';
+  if(deskIcon){ const img=deskIcon.querySelector('.icon-image img'); const i=deskIcon.querySelector('.icon-image i'); if(img) iconHtml=`<img class="window-icon" src="${img.src}" style="width:16px;height:16px;border-radius:3px;background:#fff;border:1px solid #ccc;object-fit:contain">`; else if(i) iconHtml=`<i class="${i.className} window-icon"></i>`; }
 
-  win.innerHTML = `
-    <div class="window-header">
+  win.innerHTML=`<div class="window-header">
       <div class="window-title">${iconHtml}${appName}</div>
       <div class="window-controls">
         <div class="window-control minimize"><i class="fas fa-minus"></i></div>
@@ -1218,42 +1004,40 @@ function openCustomApp(appName, appUrl, appId) {
     </div>
     <div class="window-content" style="padding:0;">
       <div class="loading" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-        <div class="spinner" style="width:48px;height:48px;border:6px solid #e0e0e0;border-top:6px solid #0078d7;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div>
-        <span style="color:#0078d7;font-weight:500;font-size:16px;">Loading...</span>
+        <div class="spinner" style="width:48px;height:48px;border:6px solid #e0e0e0;border-top:6px solid #0078d7;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px"></div>
+        <span style="color:#0078d7;font-weight:500;font-size:16px">Loading...</span>
       </div>
     </div>
-    <div class="window-resize-handle"></div>
-  `;
+    <div class="window-resize-handle"></div>`;
   document.querySelector('.desktop').appendChild(win);
-  addWindowControls(win);
-  addToTaskbar(id, win);
-  bringToFront(win);
+  addWindowControls(win); addToTaskbar(id,win); bringToFront(win);
 
-  const content = win.querySelector('.window-content');
-  const loading = win.querySelector('.loading');
-  const iframe = document.createElement('iframe');
-  iframe.src = appUrl; iframe.style.width='100%'; iframe.style.height='100%'; iframe.style.border='none';
-  iframe.onload = () => { if (loading) loading.style.display='none'; };
+  const content=win.querySelector('.window-content');
+  const loading=win.querySelector('.loading');
+  const iframe=document.createElement('iframe'); iframe.src=appUrl; iframe.style.width='100%'; iframe.style.height='100%'; iframe.style.border='none';
+  iframe.onload=()=>{ if(loading) loading.style.display='none'; };
   content.appendChild(iframe);
 }
 
 /* ---------- Boot ---------- */
-document.addEventListener('DOMContentLoaded', () => {
-  if (!window.__SEWER_DESKTOP_INIT) initDesktop();
-  if (typeof applySettings === 'function') applySettings();
+document.addEventListener('DOMContentLoaded',()=>{
+  if(!window.__SEWER_DESKTOP_INIT) initDesktop();
+  if(typeof applySettings==='function') applySettings();
 });
 
 /* ---------- App module list ---------- */
-window.APP_MODULES = [
+window.APP_MODULES=[
   './apps/Notepad.js',
   './apps/Calculator.js',
   './apps/Paint.js',
   './apps/Settings.js',
   './apps/Map.js',
   './apps/AssetMap.js',
-  './apps/OneNote.js',     /* optional sample */
-  './apps/HelloWorld.js'   /* optional sample */
+  './apps/OneNote.js',
+  './apps/HelloWorld.js',
+  './apps/StickyNote.js',
+  './apps/TaskManager.js',
 ];
-  </script>
+</script>
 </body>
 </html>
